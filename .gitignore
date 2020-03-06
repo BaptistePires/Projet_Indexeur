@@ -76,3 +76,6 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# Custom
+src/main/resources/csv/*.csv
