@@ -79,3 +79,6 @@ Thumbs.db
 
 # Custom
 src/main/resources/csv/*.csv
+
+# Except
+!src/main/resources/csv/test.csv
