@@ -1,5 +1,7 @@
 package com.dant.app;
 
+import com.dant.exception.InvalidIndexException;
+import com.dant.exception.InvalidIndexExceptionMapper;
 import com.dant.exception.RuntimeExceptionMapper;
 import com.dant.filter.GsonProvider;
 
@@ -27,6 +29,8 @@ public class App extends Application {
 		Set<Class<?>> sets = new HashSet<>(1);
 		sets.add(GsonProvider.class);
 		sets.add(RuntimeExceptionMapper.class);
+		sets.add(InvalidIndexException.class);
+		sets.add(InvalidIndexExceptionMapper.class);
 		return sets;
 	}
 }
