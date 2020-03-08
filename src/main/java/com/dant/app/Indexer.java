@@ -1,6 +1,8 @@
 package com.dant.app;
 
+import com.google.gson.Gson;
 import com.dant.exception.InvalidIndexException;
+import com.google.gson.GsonBuilder;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -12,6 +14,8 @@ import java.util.List;
 public class Indexer {
 	List<String> cols;
 	String index;
+//	private final Gson gson = new GsonBuilder().serializeNulls().create();
+
 
 	@GET
 	@Path("/createTable")
@@ -41,6 +45,19 @@ public class Indexer {
 	@Path("/showIndex") // DEBUG
 	public String showIndex(){
 		return this.index;
+	}
+
+
+	@POST
+	@Path("/loadData")
+	public void loadData()  {
+		// TO DO
+	}
+
+	@GET
+	@Path("/getRows")
+	public void getRows()  {
+		// TO DO
 	}
 	
 }
