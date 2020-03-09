@@ -3,9 +3,12 @@ package com.dant.app;
 import com.google.gson.Gson;
 import com.dant.exception.InvalidIndexException;
 import com.google.gson.GsonBuilder;
+import org.omg.CORBA.DynAnyPackage.Invalid;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Path("/indexer")
@@ -13,15 +16,15 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class Indexer {
 	List<String> cols;
-	String index;
+	List<String> indexs;
 //	private final Gson gson = new GsonBuilder().serializeNulls().create();
 
 
 	@GET
 	@Path("/createTable")
 	public List<String> createTable(@QueryParam("cols") List<String> cols){
-		this.cols = cols;
-		return cols;
+		this.cols = Arrays.asList(cols.get(0).split(","));
+		return this.cols;
 	}
 
 	@GET
@@ -31,20 +34,26 @@ public class Indexer {
 	}
 
 	@GET
-	@Path("/addIndex")  // Use one index at first, but will become an ArrayList<String> (multi)
-	public String addIndex(@QueryParam("index") String index) throws InvalidIndexException {
-		if (this.cols.contains(index)) {
-			this.index = index;
-			return index;
-		} else {
-			throw new InvalidIndexException();
+	@Path("/addIndex")
+	public List<String> addIndex(@QueryParam("indexsToAdd") List<String> indexsToAdd) throws InvalidIndexException {
+		if(!this.cols.containsAll(indexsToAdd)){
+			StringBuilder sb = new StringBuilder();
+			for(String s: indexsToAdd){
+				if(!this.cols.contains(s)){
+					System.out.println(s);
+					sb.append(s).append(" ");
+				}
+			}
+			throw new InvalidIndexException(sb.toString());
 		}
+		this.indexs = indexsToAdd;
+		return this.indexs;
 	}
 
 	@GET
 	@Path("/showIndex") // DEBUG
 	public String showIndex(){
-		return this.index;
+		return this.indexs.toString();
 	}
 
 
