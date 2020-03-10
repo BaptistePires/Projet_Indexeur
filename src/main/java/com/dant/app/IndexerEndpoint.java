@@ -12,7 +12,7 @@ import java.util.List;
 @Path("/indexer")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class Indexer {
+public class IndexerEndpoint {
 	List<String> cols;
 	List<String> indexes;
 
