@@ -1,10 +1,12 @@
 package com.dant.exception;
 
 public class InvalidIndexException extends Exception {
-	public InvalidIndexException(String msg){
-		super("Invalid Index : " + msg);
+
+	public InvalidIndexException() {
+		super("InvalidIndexException");
 	}
-	public InvalidIndexException(){
-		super("Invalid Index.");
+
+	public InvalidIndexException(String msg){
+		super("InvalidIndexException: The following columns don't belong to the table: " + msg);
 	}
 }

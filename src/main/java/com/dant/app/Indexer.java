@@ -1,9 +1,7 @@
 package com.dant.app;
 
-import com.google.gson.Gson;
 import com.dant.exception.InvalidIndexException;
-import com.google.gson.GsonBuilder;
-import org.omg.CORBA.DynAnyPackage.Invalid;
+
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -16,16 +14,17 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class Indexer {
 	List<String> cols;
-	List<String> indexs;
-//	private final Gson gson = new GsonBuilder().serializeNulls().create();
+	List<String> indexes;
 
 
-	@GET
+	@POST
 	@Path("/createTable")
-	public List<String> createTable(@QueryParam("cols") List<String> cols){
-		this.cols = Arrays.asList(cols.get(0).split(","));
+	public List<String> createTable(List<String> cols){
+		System.out.println("Received columns " + cols);
+		this.cols = cols;
 		return this.cols;
 	}
+
 
 	@GET
 	@Path("/showTable") // DEBUG
@@ -33,40 +32,43 @@ public class Indexer {
 		return this.cols;
 	}
 
-	@GET
+
+	@POST
 	@Path("/addIndex")
-	public List<String> addIndex(@QueryParam("indexsToAdd") List<String> indexsToAdd) throws InvalidIndexException {
-		if(!this.cols.containsAll(indexsToAdd)){
-			StringBuilder sb = new StringBuilder();
-			for(String s: indexsToAdd){
+	public List<String> addIndex(List<String> indexesToAdd) throws InvalidIndexException {
+		System.out.println("Received indexes to add: " + indexesToAdd);
+		if(!this.cols.containsAll(indexesToAdd)){
+			List<String> invalidIndexes = new ArrayList<>();
+			for(String s: indexesToAdd){
 				if(!this.cols.contains(s)){
-					System.out.println(s);
-					sb.append(s).append(" ");
+					invalidIndexes.add(s);
 				}
 			}
-			throw new InvalidIndexException(sb.toString());
+			throw new InvalidIndexException(invalidIndexes.toString());
 		}
-		this.indexs = indexsToAdd;
-		return this.indexs;
+		this.indexes = indexesToAdd;
+		return this.indexes;
 	}
+
 
 	@GET
 	@Path("/showIndex") // DEBUG
-	public String showIndex(){
-		return this.indexs.toString();
+	public List<String> showIndex(){
+		return this.indexes;
 	}
 
 
 	@POST
 	@Path("/loadData")
 	public void loadData()  {
-		// TO DO
+		// TODO
 	}
+
 
 	@GET
 	@Path("/getRows")
 	public void getRows()  {
-		// TO DO
+		// TODO
 	}
 	
 }
