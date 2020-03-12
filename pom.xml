@@ -35,6 +35,65 @@
 			<artifactId>joda-time</artifactId>
 			<version>2.9.7</version>
 		</dependency>
+
+		<!-- Servlet 3.0 API -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- JAX-RS RESTful Web Services -->
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet</artifactId>
+			<version>2.30.1</version>
+		</dependency>
+
+		<!-- Jersey -->
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-common</artifactId>
+			<version>2.30.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-multipart</artifactId>
+			<version>2.30.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.core</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>2.30.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet-core</artifactId>
+			<version>2.30.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+			<version>2.30.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-jackson</artifactId>
+			<version>2.30.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-moxy</artifactId>
+			<version>2.30.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-grizzly2-http</artifactId>
+			<version>2.30.1</version>
+		</dependency>
+
+
 	</dependencies>
 	<build>
 		<finalName>dant</finalName>
@@ -52,12 +111,11 @@
 			<plugin>
 				<groupId>org.eclipse.jetty</groupId>
 				<artifactId>jetty-maven-plugin</artifactId>
-				<version>9.4.0.v20161208</version>
+				<version>10.0.0.alpha1</version>
 				<configuration>
 					<webApp>
 						<contextPath>/</contextPath>
 					</webApp>
-					<scanIntervalSeconds>2</scanIntervalSeconds>
 				</configuration>
 			</plugin>
 		</plugins>
