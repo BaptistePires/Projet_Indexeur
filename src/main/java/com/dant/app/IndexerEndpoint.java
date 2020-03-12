@@ -1,6 +1,7 @@
 package com.dant.app;
 
 import com.dant.exception.InvalidFileException;
+import com.dant.entity.Table;
 import com.dant.exception.InvalidIndexException;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -20,48 +21,47 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class IndexerEndpoint {
-	List<String> cols;
-	List<String> indexes;
+	private Table table;
 
 
 	@POST
 	@Path("/createTable")
-	public List<String> createTable(List<String> cols){
+	public boolean createTable(List<String> cols){
 		System.out.println("Received columns " + cols);
-		this.cols = cols;
-		return this.cols;
+		this.table = new Table(cols);
+		return true;
 	}
 
 
 	@GET
 	@Path("/showTable") // DEBUG
-	public List<String> showTable(){
-		return this.cols;
+	public Table showTable(){
+		return this.table;
 	}
 
 
 	@POST
 	@Path("/addIndex")
-	public List<String> addIndex(List<String> indexesToAdd) throws InvalidIndexException {
+	public boolean addIndex(List<String> indexesToAdd) throws InvalidIndexException {
 		System.out.println("Received indexes to add: " + indexesToAdd);
-		if(!this.cols.containsAll(indexesToAdd)){
+		if(!this.table.getCols().containsAll(indexesToAdd)){
 			List<String> invalidIndexes = new ArrayList<>();
 			for(String s: indexesToAdd){
-				if(!this.cols.contains(s)){
+				if(!this.table.getCols().contains(s)){
 					invalidIndexes.add(s);
 				}
 			}
 			throw new InvalidIndexException(invalidIndexes.toString());
 		}
-		this.indexes = indexesToAdd;
-		return this.indexes;
+		this.table.setIndexes(indexesToAdd);
+		return true;
 	}
 
 
 	@GET
 	@Path("/showIndex") // DEBUG
 	public List<String> showIndex(){
-		return this.indexes;
+		return this.table.getIndexes();
 	}
 
 
