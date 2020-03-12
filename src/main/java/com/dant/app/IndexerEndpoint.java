@@ -71,7 +71,8 @@ public class IndexerEndpoint {
 	public Response uploadData(@FormDataParam("file") InputStream uploadedInputStream,
 	                           @FormDataParam("file") FormDataContentDisposition fileDetail)
 			throws InvalidFileException {
-		String location = "./" + fileDetail.getFileName();
+		System.out.println("RECEIVED FILE " + fileDetail.getFileName());
+		String location = "./src/main/resources/csv/" + fileDetail.getFileName();
 		if (!fileDetail.getFileName().endsWith(".csv")) {
 			throw new InvalidFileException(fileDetail.getFileName());
 		} else {
