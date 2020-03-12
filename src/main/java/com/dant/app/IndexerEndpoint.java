@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,7 +73,7 @@ public class IndexerEndpoint {
 	                           @FormDataParam("file") FormDataContentDisposition fileDetail)
 			throws InvalidFileException {
 		System.out.println("RECEIVED FILE " + fileDetail.getFileName());
-		String location = "./src/main/resources/csv/" + fileDetail.getFileName();
+		String location = Paths.get(".","src", "main", "resources", "csv", fileDetail.getFileName()).toString();
 		if (!fileDetail.getFileName().endsWith(".csv")) {
 			throw new InvalidFileException(fileDetail.getFileName());
 		} else {
