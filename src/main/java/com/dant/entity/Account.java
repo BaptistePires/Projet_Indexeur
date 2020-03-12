@@ -35,23 +35,23 @@ public class Account implements Serializable {
 		this.updated = updated;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
+//	@Override
+//	public boolean equals(Object o) {
+//		if (this == o) return true;
+//		if (o == null || getClass() != o.getClass()) return false;
+//
+//		Account account = (Account) o;
+//
+//		return email.equals(account.email);
+//	}
 
-		Account account = (Account) o;
-
-		return email.equals(account.email);
-	}
-
-	@Override
-	public int hashCode() {
-		return email.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return email;
-	}
+//	@Override
+//	public int hashCode() {
+//		return email.hashCode();
+//	}
+//
+//	@Override
+//	public String toString() {
+//		return email;
+//	}
 }

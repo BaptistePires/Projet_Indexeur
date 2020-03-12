@@ -1,53 +1,30 @@
 package com.dant.entity;
 
+import com.google.gson.annotations.Expose;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-public class Table {
-    private List<String> cols;
-    private List<String> rows;
-    private List<String> indexes;
+public class Table implements Serializable {
 
+    private Set<Column> columns;
 
-    public Table(List<String> cols) {
-        this.cols = cols;
+    public Table(){
+        this.columns = new HashSet<>();
     }
 
-    public Table(List<String> cols, List<String> indexes) {
-        this.cols = cols;
-        this.indexes = indexes;
+    public void addColumn(Column c){
+        columns.add(c);
     }
 
-
-    public List<String> getCols() {
-        return cols;
+    public Set<Column> getColumns() {
+        return columns;
     }
 
-    public void setCols(List<String> cols) {
-        this.cols = cols;
-    }
-
-    public List<String> getRows() {
-        return rows;
-    }
-
-    public void setRows(List<String> rows) {
-        this.rows = rows;
-    }
-
-    public List<String> getIndexes() {
-        return indexes;
-    }
-
-    public void setIndexes(List<String> indexes) {
-        this.indexes = indexes;
-    }
-
-    @Override
-    public String toString() {
-        return "Table{" +
-                "cols=" + cols +
-                ", rows=" + rows +
-                ", indexes=" + indexes +
-                '}';
+    public void setColumns(Set<Column> columns) {
+        this.columns = columns;
     }
 }
