@@ -21,7 +21,7 @@ import java.lang.reflect.Type;
 public class GsonProvider implements MessageBodyWriter<Object>, MessageBodyReader<Object> {
 
     private final Gson gson = new GsonBuilder()
-            .excludeFieldsWithoutExposeAnnotation()
+//            .excludeFieldsWithoutExposeAnnotation()
             .serializeNulls()
             .registerTypeAdapter(Class.class, new ClassWildcardJsonSerializer())
             .create();

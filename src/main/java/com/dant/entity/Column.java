@@ -1,7 +1,6 @@
 package com.dant.entity;
 
 import com.dant.exception.UnsupportedTypeException;
-import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
 
