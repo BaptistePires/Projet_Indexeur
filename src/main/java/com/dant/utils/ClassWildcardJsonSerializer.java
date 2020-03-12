@@ -10,7 +10,7 @@ import java.lang.reflect.Type;
 public class ClassWildcardJsonSerializer implements JsonSerializer<Class<?>> {
     @Override
     public JsonElement serialize(Class<?> aClass, Type type, JsonSerializationContext jsonSerializationContext) {
-        if(aClass == null) return JsonNull.INSTANCE;
+        if (aClass == null) return JsonNull.INSTANCE;
         return jsonSerializationContext.serialize(aClass.getTypeName(), String.class);
 
 

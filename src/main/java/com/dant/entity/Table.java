@@ -1,7 +1,5 @@
 package com.dant.entity;
 
-import com.dant.exception.UnsupportedTypeException;
-
 import java.io.Serializable;
 import java.util.*;
 
@@ -25,26 +23,26 @@ public class Table implements Serializable {
      */
     private Set<Column> indexes;
 
-    public Table(){
+    public Table() {
         columns = new HashSet<>();
         columnMappedByName = new HashMap<>();
         indexes = new HashSet<>();
     }
 
-    public void addColumn(Column c){
+    public void addColumn(Column c) {
         columns.add(c);
         columnMappedByName.put(c.getName(), c);
     }
 
-    public void addIndexByName(String id){
+    public void addIndexByName(String id) {
         indexes.add(getColumnByName(id));
     }
 
-    public void removeColumnByName(String name){
+    public void removeColumnByName(String name) {
         removeColumnByReference(getColumnByName(name));
     }
 
-    public void removeColumnByReference(Column col){
+    public void removeColumnByReference(Column col) {
         // As there are no pointers, we need to remove manually references to object
         // in each list
         columns.remove(col);
@@ -52,20 +50,20 @@ public class Table implements Serializable {
         indexes.remove(col);
     }
 
-    public void removeIndex(String colName){
+    public void removeIndex(String colName) {
         indexes.remove(getColumnByName(colName));
     }
 
-    public void removeIndexedColByReference(Column col){
+    public void removeIndexedColByReference(Column col) {
         removeIndex(col.getName());
     }
 
     // Getters & Setters
-    public Map<String, Column> getColumnMappedByName(){
+    public Map<String, Column> getColumnMappedByName() {
         return columnMappedByName;
     }
 
-    public Column getColumnByName(String name){
+    public Column getColumnByName(String name) {
         return columnMappedByName.get(name);
     }
 
@@ -73,11 +71,11 @@ public class Table implements Serializable {
         return columns;
     }
 
-    public List<String> getColumnsName(){
+    public List<String> getColumnsName() {
         return new ArrayList<>(columnMappedByName.keySet());
     }
 
-    public Set<Column> getIndexedColumns(){
+    public Set<Column> getIndexedColumns() {
         return indexes;
     }
 }

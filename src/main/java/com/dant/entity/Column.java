@@ -18,7 +18,7 @@ public class Column implements Serializable {
 
     // Currently supporting only Integers and Strings
     public void setUpTypeCaster(String type) throws UnsupportedTypeException {
-        switch (type){
+        switch (type) {
             case "Integer":
                 typeCaster = Integer.class;
                 break;
@@ -32,11 +32,11 @@ public class Column implements Serializable {
         }
     }
 
-    public Class<?> getTypeCaster(){
+    public Class<?> getTypeCaster() {
         return typeCaster;
     }
 
-    public void setColumnNo(int columnNo){
+    public void setColumnNo(int columnNo) {
         this.columnNo = columnNo;
     }
 
@@ -57,7 +57,6 @@ public class Column implements Serializable {
     }
 
 
-
     @Override
     public int hashCode() {
         int hash = 11;
@@ -68,6 +67,6 @@ public class Column implements Serializable {
 
     @Override
     public String toString() {
-        return "{name:"+getName()+", typeCaster";
+        return "{name:" + getName() + ", typeCaster";
     }
 }

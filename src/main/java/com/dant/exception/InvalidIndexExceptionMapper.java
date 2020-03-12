@@ -5,8 +5,8 @@ import javax.ws.rs.ext.ExceptionMapper;
 
 public class InvalidIndexExceptionMapper implements ExceptionMapper<InvalidIndexException> {
 
-	@Override
-	public Response toResponse(InvalidIndexException e) {
-		return Response.status(400).entity(e.getMessage()).type("plain/text").build();
-	}
+    @Override
+    public Response toResponse(InvalidIndexException e) {
+        return Response.status(400).entity(e.getMessage()).type("plain/text").build();
+    }
 }
