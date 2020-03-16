@@ -3,37 +3,40 @@ package com.dant.entity;
 import com.dant.exception.UnsupportedTypeException;
 
 import java.io.Serializable;
+import java.util.function.Function;
 
 public class Column implements Serializable {
 
     private String name;
-    private Class<?> typeCaster;
+    private Function<String, ?> typeCaster;
+    private String strType;
     private int columnNo;
 
     public Column(String name, String type) throws UnsupportedTypeException {
         this.name = name;
         columnNo = -1;
-        setUpTypeCaster(type);
+        strType = type;
+        setUpTypeCaster();
     }
 
     // Currently supporting only Integers and Strings
-    public void setUpTypeCaster(String type) throws UnsupportedTypeException {
-        switch (type) {
+    public void setUpTypeCaster() throws UnsupportedTypeException {
+        switch (strType) {
             case "Integer":
-                typeCaster = Integer.class;
+                typeCaster = Integer::parseInt;
                 break;
 
             case "String":
-                typeCaster = String.class;
+                typeCaster = String::new;
                 break;
 
             default:
-                throw new UnsupportedTypeException("Type not supported : " + type);
+                throw new UnsupportedTypeException("Type not supported : " + strType);
         }
     }
 
-    public Class<?> getTypeCaster() {
-        return typeCaster;
+    public Object getTypeCaster(String s) {
+        return typeCaster.apply(s);
     }
 
     public void setColumnNo(int columnNo) {
@@ -46,10 +49,6 @@ public class Column implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public void setTypeCaster(Class<?> typeCaster) {
-        this.typeCaster = typeCaster;
     }
 
     public int getColumnNo() {

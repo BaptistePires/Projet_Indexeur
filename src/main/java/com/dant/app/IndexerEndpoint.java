@@ -5,6 +5,7 @@ import com.dant.entity.Table;
 import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
 import com.dant.exception.UnsupportedTypeException;
+import com.dant.indexing_engine.IndexingEngineSingleton;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -29,7 +30,7 @@ import java.util.Set;
 @Consumes(MediaType.APPLICATION_JSON)
 public class IndexerEndpoint {
 
-    private Table table;
+    IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
 
 
     @POST
@@ -37,9 +38,8 @@ public class IndexerEndpoint {
     public Response createTable(String body) throws UnsupportedTypeException {
         // TODO : Check duplicated columns
         JsonObject columns = new JsonParser().parse(body).getAsJsonObject();
-        table = new Table();
         for (Map.Entry<String, JsonElement> col : columns.entrySet()) {
-            table.addColumn(new Column(col.getKey(), col.getValue().getAsString()));
+            indexingEngine.getTable().addColumn(new Column(col.getKey(), col.getValue().getAsString()));
         }
         return Response.status(201).build();
     }
@@ -48,7 +48,7 @@ public class IndexerEndpoint {
     @GET
     @Path("/showTable")
     public Table showTable() {
-        return table;
+        return indexingEngine.getTable();
     }
 
 
@@ -63,10 +63,10 @@ public class IndexerEndpoint {
     @Path("/addIndexes")
     public Response addIndex(List<String> indexesToAdd) throws InvalidIndexException {
         // Before inserting indexes, we must check data integrity
-        if (indexesToAdd.size() > table.getColumns().size())
+        if (indexesToAdd.size() > indexingEngine.getTable().getColumns().size())
             throw new InvalidIndexException("You provided more indexes" +
                     "than there are columns.");
-        List<String> allColumnsName = table.getColumnsName();
+        List<String> allColumnsName = indexingEngine.getTable().getColumnsName();
         if (!allColumnsName.containsAll(indexesToAdd)) {
             List<String> invalidIndexes = new ArrayList<>();
             for (String s : indexesToAdd) {
@@ -76,7 +76,7 @@ public class IndexerEndpoint {
         }
         // Add indexes
         for (String s : indexesToAdd) {
-            table.addIndexByName(s);
+            indexingEngine.getTable().addIndexByName(s);
         }
         return Response.status(201).build();
     }
@@ -85,7 +85,7 @@ public class IndexerEndpoint {
     @GET
     @Path("/showIndex")
     public Set<Column> showIndex() {
-        return this.table.getIndexedColumns();
+        return indexingEngine.getTable().getIndexedColumns();
     }
 
 

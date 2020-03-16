@@ -1,5 +1,7 @@
 package com.dant.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -15,6 +17,7 @@ public class Table implements Serializable {
      * columnMappedByName : Map indexing columns by their names, can be useful when we load a .csv
      * file and need to retrieve header's columns types.
      */
+    @JsonIgnore
     private Map<String, Column> columnMappedByName;
 
     /**
