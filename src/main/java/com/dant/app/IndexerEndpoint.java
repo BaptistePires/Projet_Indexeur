@@ -1,7 +1,7 @@
 package com.dant.app;
 
 import com.dant.entity.Column;
-import com.dant.entity.Table;
+import com.dant.entity.Query;
 import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
 import com.dant.exception.UnsupportedTypeException;
@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.jboss.resteasy.annotations.GZIP;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -39,7 +40,7 @@ public class IndexerEndpoint {
         // TODO : Check duplicated columns
         JsonObject columns = new JsonParser().parse(body).getAsJsonObject();
         for (Map.Entry<String, JsonElement> col : columns.entrySet()) {
-            indexingEngine.getTable().addColumn(new Column(col.getKey(), col.getValue().getAsString()));
+            IndexingEngineSingleton.getInstance().getTable().addColumn(new Column(col.getKey(), col.getValue().getAsString()));
         }
         return Response.status(201).build();
     }
@@ -47,8 +48,8 @@ public class IndexerEndpoint {
 
     @GET
     @Path("/showTable")
-    public Table showTable() {
-        return indexingEngine.getTable();
+    public Set<Column> showTable() {
+        return IndexingEngineSingleton.getInstance().getTable().getColumns();
     }
 
 
@@ -63,10 +64,10 @@ public class IndexerEndpoint {
     @Path("/addIndexes")
     public Response addIndex(List<String> indexesToAdd) throws InvalidIndexException {
         // Before inserting indexes, we must check data integrity
-        if (indexesToAdd.size() > indexingEngine.getTable().getColumns().size())
+        if (indexesToAdd.size() > IndexingEngineSingleton.getInstance().getTable().getColumns().size())
             throw new InvalidIndexException("You provided more indexes" +
                     "than there are columns.");
-        List<String> allColumnsName = indexingEngine.getTable().getColumnsName();
+        List<String> allColumnsName = IndexingEngineSingleton.getInstance().getTable().getColumnsName();
         if (!allColumnsName.containsAll(indexesToAdd)) {
             List<String> invalidIndexes = new ArrayList<>();
             for (String s : indexesToAdd) {
@@ -76,7 +77,7 @@ public class IndexerEndpoint {
         }
         // Add indexes
         for (String s : indexesToAdd) {
-            indexingEngine.getTable().addIndexByName(s);
+            IndexingEngineSingleton.getInstance().getTable().addIndexByName(s);
         }
         return Response.status(201).build();
     }
@@ -85,7 +86,7 @@ public class IndexerEndpoint {
     @GET
     @Path("/showIndex")
     public Set<Column> showIndex() {
-        return indexingEngine.getTable().getIndexedColumns();
+        return IndexingEngineSingleton.getInstance().getTable().getIndexedColumns();
     }
 
 
@@ -116,11 +117,49 @@ public class IndexerEndpoint {
         return Response.status(200).entity("File successfully uploaded to " + location).build();
     }
 
+    @POST
+    @Path("/startIndexing")
+    public Response startIndexing() {
+        if (!indexingEngine.canIndex()) {
+            return Response.status(403).entity("IndexingEngine is not ready to process your data").build();
+        }
 
-    @GET
-    @Path("/getRows")
-    public void getRows() {
-        // TODO
+        Thread t = new Thread() {
+
+            @Override
+            public void run() {
+                super.run();
+                indexingEngine.startIndexing();
+            }
+        };
+        t.start();
+        return Response.status(200).entity("Indexing stated").build();
+    }
+
+    /**
+     *
+     * @param q Query object, must be like :
+     *
+     * 	            {"type": "SELECT",
+     * 	             "cols": ["VendorID"],
+     * 		         "conditions": {
+     *                  "VendorID": {
+     * 				        "operator": "=",
+     * 				        "value": 2
+     *                        }
+     *               }
+     *               }
+     *
+     *
+     *          Currently only support one index, need improvements.
+     *          There is no columns selection too. All columns will be returned
+     *          as String. TODO: fix type issue.
+     */
+    @POST
+    @GZIP
+    @Path("/query")
+    public Response testQuery(Query q) {
+        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(IndexingEngineSingleton.getInstance().handleQuery(q)).build();
     }
 
 }
