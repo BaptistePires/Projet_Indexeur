@@ -28,7 +28,7 @@
     </servlet-mapping>
 
     <servlet>
-        <servlet-name>Jersey2Config</servlet-name>
+        <servlet-name>SwaggerConf</servlet-name>
         <servlet-class>io.swagger.jersey.config.JerseyJaxrsConfig</servlet-class>
         <init-param>
             <param-name>api.version</param-name>
