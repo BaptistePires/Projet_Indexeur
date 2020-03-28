@@ -13,6 +13,5 @@ public class ClassWildcardJsonSerializer implements JsonSerializer<Class<?>> {
         if (aClass == null) return JsonNull.INSTANCE;
         return jsonSerializationContext.serialize(aClass.getTypeName(), String.class);
 
-
     }
 }

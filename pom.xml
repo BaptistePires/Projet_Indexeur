@@ -5,7 +5,38 @@
 	<artifactId>dant</artifactId>
 	<packaging>war</packaging>
 	<version>1.0</version>
-	<name>dant</name>
+	<name>Index Engine</name>
+
+	<!-- Development team information -->
+	<developers>
+		<developer>
+			<name>Baptiste Pires</name>
+			<organization>DANT</organization>
+			<organizationUrl>https://github.com/BaptistePires</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>UTC +2</timezone>
+		</developer>
+		<developer>
+			<name>Massil Taguemout</name>
+			<organization>DANT</organization>
+			<organizationUrl>https://github.com/massiltag</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>UTC +2</timezone>
+		</developer>
+		<developer>
+			<name>Francis Murray</name>
+			<organization>DANT</organization>
+			<organizationUrl>https://github.com/francis-murray</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>UTC +2</timezone>
+		</developer>
+	</developers>
 
 	<properties>
 		<resteasy.version>3.1.0.Final</resteasy.version>
@@ -93,6 +124,12 @@
 			<version>2.30.1</version>
 		</dependency>
 
+		<!-- SWAGGER -->
+		<dependency>
+			<groupId>io.swagger</groupId>
+			<artifactId>swagger-jersey2-jaxrs</artifactId>
+			<version>1.5.0</version>
+		</dependency>
 
 	</dependencies>
 	<build>
@@ -117,6 +154,21 @@
 						<contextPath>/</contextPath>
 					</webApp>
 				</configuration>
+			</plugin>
+
+			<!-- Reporting -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.9.0</version>
+				<configuration>
+					<locales>en,fr</locales>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-project-info-reports-plugin</artifactId>
+				<version>3.0.0</version>
 			</plugin>
 		</plugins>
 	</build>
