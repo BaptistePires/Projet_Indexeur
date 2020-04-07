@@ -2,6 +2,8 @@ package com.dant.app;
 
 import com.dant.exception.*;
 import com.dant.filter.GsonProvider;
+import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import org.glassfish.jersey.logging.LoggingFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.media.multipart.MultiPartProperties;
@@ -14,7 +16,7 @@ import java.util.Set;
 /**
  * Created by pitton on 2017-02-20.
  */
-@ApplicationPath("")
+@ApplicationPath("/api")
 public class App extends Application {
 
     @Override
@@ -38,6 +40,8 @@ public class App extends Application {
         sets.add(MultiPartFeature.class);
         sets.add(MultiPartProperties.class);
         sets.add(LoggingFeature.class);
+        sets.add(OpenApiResource.class);
+        sets.add(AcceptHeaderOpenApiResource.class);
         return sets;
     }
 }

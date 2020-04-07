@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by pitton on 2017-02-20.
  */
-@Path("/api/test")
+@Path("/testEndpoint")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class TestEndpoint {
