@@ -6,15 +6,20 @@ import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
 import com.dant.exception.UnsupportedTypeException;
 import com.dant.indexing_engine.IndexingEngineSingleton;
+import com.dant.utils.IndexerUtil;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import org.apache.commons.io.IOUtils;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 import org.jboss.resteasy.annotations.GZIP;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -93,28 +98,30 @@ public class IndexerEndpoint {
     @POST
     @Path("/uploadData")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadData(@FormDataParam("file") InputStream uploadedInputStream,
-                               @FormDataParam("file") FormDataContentDisposition fileDetail)
-            throws InvalidFileException {
-        System.out.println("RECEIVED FILE " + fileDetail.getFileName());
-        String location = Paths.get(".", "src", "main", "resources", "csv", fileDetail.getFileName()).toString();
-        if (!fileDetail.getFileName().endsWith(".csv")) {
-            throw new InvalidFileException(fileDetail.getFileName());
-        } else {
+    public Response uploadData(MultipartFormDataInput input) {
+        String location = "", fileName = "";
+        Map <String, List <InputPart>> uploadForm = input.getFormDataMap();
+        List <InputPart> inputParts = uploadForm.get("file");
+
+        for (InputPart inputPart: inputParts) {
             try {
-                FileOutputStream out = new FileOutputStream(new File(location));
-                int read = 0;
-                byte[] bytes = new byte[1024];
-                while ((read = uploadedInputStream.read(bytes)) != -1) {
-                    out.write(bytes, 0, read);
-                }
-                out.flush();
-                out.close();
+                MultivaluedMap<String, String> header = inputPart.getHeaders();
+                fileName = IndexerUtil.getFileName(header);
+
+                // File to InputStream
+                InputStream inputStream = inputPart.getBody(InputStream.class, null);
+                byte[] bytes = IOUtils.toByteArray(inputStream);
+
+                // to path
+                location = Paths.get(".", "src", "main", "resources", "csv", fileName).toString();
+
+                // saving
+                IndexerUtil.saveFile(bytes, location);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        return Response.status(200).entity("File successfully uploaded to " + location).build();
+        return Response.status(200).entity("Uploaded file to : " + location).build();
     }
 
     @POST
