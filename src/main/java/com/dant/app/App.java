@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * Created by pitton on 2017-02-20.
  */
-@ApplicationPath("")
+@ApplicationPath("/api")
 public class App extends Application {
 
     @Override

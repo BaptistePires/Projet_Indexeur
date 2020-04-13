@@ -98,7 +98,7 @@ public class IndexerEndpoint {
     @POST
     @Path("/uploadData")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
-    public Response uploadData(MultipartFormDataInput input) {
+    public Response uploadData(MultipartFormDataInput input) throws InvalidFileException {
         String location = "", fileName = "";
         Map <String, List <InputPart>> uploadForm = input.getFormDataMap();
         List <InputPart> inputParts = uploadForm.get("file");
@@ -108,15 +108,19 @@ public class IndexerEndpoint {
                 MultivaluedMap<String, String> header = inputPart.getHeaders();
                 fileName = IndexerUtil.getFileName(header);
 
-                // File to InputStream
-                InputStream inputStream = inputPart.getBody(InputStream.class, null);
-                byte[] bytes = IOUtils.toByteArray(inputStream);
+	            if (!fileName.endsWith(".csv")) {
+		            throw new InvalidFileException(fileName);
+	            } else {
+		            // File to InputStream
+		            InputStream inputStream = inputPart.getBody(InputStream.class, null);
+		            byte[] bytes = IOUtils.toByteArray(inputStream);
 
-                // to path
-                location = Paths.get(".", "src", "main", "resources", "csv", fileName).toString();
+		            // to path
+		            location = Paths.get(".", "src", "main", "resources", "csv", fileName).toString();
 
-                // saving
-                IndexerUtil.saveFile(bytes, location);
+		            // saving
+		            IndexerUtil.saveFile(bytes, location);
+	            }
             } catch (IOException e) {
                 e.printStackTrace();
             }
