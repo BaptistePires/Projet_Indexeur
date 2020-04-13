@@ -2,9 +2,6 @@ package com.dant.app;
 
 import com.dant.exception.*;
 import com.dant.filter.GsonProvider;
-import org.glassfish.jersey.logging.LoggingFeature;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
-import org.glassfish.jersey.media.multipart.MultiPartProperties;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -35,9 +32,6 @@ public class App extends Application {
         sets.add(UnsupportedTypeExceptionMapper.class);
         sets.add(InvalidFileException.class);
         sets.add(InvalidFileExceptionMapper.class);
-        sets.add(MultiPartFeature.class);
-        sets.add(MultiPartProperties.class);
-        sets.add(LoggingFeature.class);
         return sets;
     }
 }
