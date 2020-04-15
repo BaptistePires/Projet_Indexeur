@@ -94,13 +94,6 @@
 			<version>2.0.1</version>
 		</dependency>
 
-		<!-- SWAGGER -->
-<!--		<dependency>-->
-<!--			<groupId>io.swagger</groupId>-->
-<!--			<artifactId>swagger-jersey2-jaxrs</artifactId>-->
-<!--			<version>1.5.0</version>-->
-<!--		</dependency>-->
-
 		<!-- SWAGGER CORE -->
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
