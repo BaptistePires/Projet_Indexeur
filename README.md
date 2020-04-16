@@ -12,4 +12,4 @@ Supervised by [Olivier PITTON](https://www.linkedin.com/in/olivier-pitton-426049
 ## Documentation
 * Swagger API Documentation: http://localhost:8080/
 * OpenAPI Specification: http://localhost:8080/api/openapi.json
-* Project Reports: Execute `mvn site`. The resulting reports will generated be in `target/site/...` 
+* Project Reports: Execute `mvn site`. The resulting reports will be generated in `target/site/...` 
