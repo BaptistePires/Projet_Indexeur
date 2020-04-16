@@ -39,7 +39,7 @@
 	</developers>
 
 	<properties>
-		<resteasy.version>3.1.0.Final</resteasy.version>
+		<resteasy.version>3.0.14.Final</resteasy.version>
 	</properties>
 
 	<dependencies>
@@ -54,12 +54,14 @@
 			<artifactId>resteasy-servlet-initializer</artifactId>
 			<version>${resteasy.version}</version>
 		</dependency>
+
 		<!-- Json lib -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.8.0</version>
 		</dependency>
+
 		<!-- Date lib -->
 		<dependency>
 			<groupId>joda-time</groupId>
@@ -89,16 +91,16 @@
 			<version>2.0.1</version>
 		</dependency>
 
-		<!-- SWAGGER -->
+		<!-- SWAGGER CORE -->
 		<dependency>
-			<groupId>io.swagger</groupId>
-			<artifactId>swagger-jersey2-jaxrs</artifactId>
-			<version>1.5.0</version>
+			<groupId>io.swagger.core.v3</groupId>
+			<artifactId>swagger-jaxrs2</artifactId>
+			<version>2.1.1</version>
 		</dependency>
 
 	</dependencies>
 	<build>
-		<finalName>dant</finalName>
+<!--		<finalName>dant</finalName>-->
 
 		<plugins>
 			<plugin>
@@ -118,8 +120,56 @@
 					<webApp>
 						<contextPath>/</contextPath>
 					</webApp>
+					<webAppSourceDirectory>target/${project.artifactId}-${project.version}</webAppSourceDirectory>
 				</configuration>
 			</plugin>
+
+			<!-- SWAGGER UI -->
+			<plugin>
+				<groupId>com.googlecode.maven-download-plugin</groupId>
+				<artifactId>download-maven-plugin</artifactId>
+				<version>1.2.1</version>
+				<executions>
+					<execution>
+						<id>swagger-ui</id>
+						<goals>
+							<goal>wget</goal>
+						</goals>
+						<configuration>
+							<skipCache>true</skipCache>
+							<url>https://github.com/swagger-api/swagger-ui/archive/master.tar.gz</url>
+							<unpack>true</unpack>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.6</version>
+				<executions>
+					<execution>
+						<id>copy-resources</id>
+						<phase>validate</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.artifactId}-${project.version}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/swagger-ui-master/dist</directory>
+									<filtering>true</filtering>
+									<excludes>
+										<exclude>index.html</exclude>
+									</excludes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 
 			<!-- Reporting -->
 			<plugin>
