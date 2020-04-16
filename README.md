@@ -7,3 +7,9 @@ Supervised by [Olivier PITTON](https://www.linkedin.com/in/olivier-pitton-426049
 * [Francis MURRAY](mailto:franciswmurray@gmail.com)
 * [Massil TAGUEMOUT](mailto:massitaguemout@gmail.com)
 * [Baptiste PIRES](mailto:baptiste.pires37@gmail.com)
+
+
+## Documentation
+* Swagger API Documentation: http://localhost:8080/
+* OpenAPI Specification: http://localhost:8080/api/openapi.json
+* Project Reports: Execute `mvn site`. The resulting reports will generated be in `target/site/...` 
