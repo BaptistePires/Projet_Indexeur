@@ -34,6 +34,8 @@ public class App extends Application {
         sets.add(UnsupportedTypeExceptionMapper.class);
         sets.add(InvalidFileException.class);
         sets.add(InvalidFileExceptionMapper.class);
+        sets.add(NoDataException.class);
+        sets.add(NoDataExceptionMapper.class);
         sets.add(OpenApiResource.class);
         sets.add(AcceptHeaderOpenApiResource.class);
         return sets;
