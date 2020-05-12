@@ -35,6 +35,7 @@ public class IndexerEndpoint {
     IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
     static String uploadedFileName = "";
 
+    // POST
     @POST
     @Path("/createTable")
     public Response createTable(String body) throws UnsupportedTypeException {
@@ -44,13 +45,6 @@ public class IndexerEndpoint {
             IndexingEngineSingleton.getInstance().getTable().addColumn(new Column(col.getKey(), col.getValue().getAsString()));
         }
         return Response.status(201).build();
-    }
-
-
-    @GET
-    @Path("/showTable")
-    public Set<Column> showTable() {
-        return IndexingEngineSingleton.getInstance().getTable().getColumns();
     }
 
 
@@ -83,22 +77,6 @@ public class IndexerEndpoint {
         return Response.status(201).build();
     }
 
-
-    @GET
-    @Path("/showIndex")
-    public Set<Column> showIndex() {
-        return IndexingEngineSingleton.getInstance().getTable().getIndexedColumns();
-    }
-
-    @GET
-    @Path("/getState")
-    public Response getState() {
-        String canIndex = indexingEngine.canIndex() ? "YES" : "NO";
-        String canQuery = indexingEngine.canQuery() ? "YES" : "NO";
-        return Response.status(200)
-                .entity("State :\n\tCan Index : " + canIndex + "\n\tCan query : " + canQuery)
-                .build();
-    }
 
     @POST
     @Path("/uploadData")
@@ -146,11 +124,15 @@ public class IndexerEndpoint {
             @Override
             public void run() {
                 super.run();
-                indexingEngine.startIndexing();
+	            try {
+		            indexingEngine.startIndexing(uploadedFileName);
+	            } catch (IOException e) {
+		            e.printStackTrace();
+	            }
             }
         };
         t.start();
-        return Response.status(200).entity("Indexing stated").build();
+        return Response.status(200).entity("Indexing started").build();
     }
 
 
@@ -178,7 +160,31 @@ public class IndexerEndpoint {
     @GZIP
     @Path("/query")
     public Response testQuery(Query q) throws IOException {
-        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(IndexingEngineSingleton.getInstance().handleQuery(q, uploadedFileName)).build();
+        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(IndexingEngineSingleton.getInstance().handleQuery(q)).build();
     }
+
+
+    // GET
+	@GET
+	@Path("/showTable")
+	public Set<Column> showTable() {
+		return IndexingEngineSingleton.getInstance().getTable().getColumns();
+	}
+
+	@GET
+	@Path("/showIndex")
+	public Set<Column> showIndex() {
+		return IndexingEngineSingleton.getInstance().getTable().getIndexedColumns();
+	}
+
+	@GET
+	@Path("/getState")
+	public Response getState() {
+		String canIndex = indexingEngine.canIndex() ? "YES" : "NO";
+		String canQuery = indexingEngine.canQuery() ? "YES" : "NO";
+		return Response.status(200)
+				.entity("State :\n\tCan Index : " + canIndex + "\n\tCan query : " + canQuery)
+				.build();
+	}
 
 }
