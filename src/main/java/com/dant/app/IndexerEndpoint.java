@@ -33,7 +33,7 @@ import java.util.Set;
 public class IndexerEndpoint {
 
     IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
-
+    static String fileName = "";
 
     @POST
     @Path("/createTable")
@@ -90,6 +90,15 @@ public class IndexerEndpoint {
         return IndexingEngineSingleton.getInstance().getTable().getIndexedColumns();
     }
 
+    @GET
+    @Path("/getState")
+    public Response getState() {
+        String canIndex = indexingEngine.canIndex() ? "YES" : "NO";
+        String canQuery = indexingEngine.canQuery() ? "YES" : "NO";
+        return Response.status(200)
+                .entity("State :\n\tCan Index : " + canIndex + "\n\tCan query : " + canQuery)
+                .build();
+    }
 
     @POST
     @Path("/uploadData")
@@ -113,6 +122,7 @@ public class IndexerEndpoint {
 
 		            // to path
 		            location = Paths.get(".", "src", "main", "resources", "csv", fileName).toString();
+                    fileName = location;
 
 		            // saving
 		            IndexerUtil.saveFile(bytes, location);
@@ -143,19 +153,21 @@ public class IndexerEndpoint {
         return Response.status(200).entity("Indexing stated").build();
     }
 
+
     /**
      *
      * @param q Query object, must be like :
      *
-     * 	            {"type": "SELECT",
-     * 	             "cols": ["VendorID"],
-     * 		         "conditions": {
-     *                  "VendorID": {
-     * 				        "operator": "=",
-     * 				        "value": 2
-     *                        }
-     *               }
-     *               }
+     * 	            {
+     * 	                "type": "SELECT",
+     * 	                "cols": ["VendorID"],
+     * 		            "conditions": {
+     *                      "VendorID": {
+     * 				            "operator": "=",
+     * 				            "value": 2
+     * 			            }
+     *                  }
+     *              }
      *
      *
      *          Currently only support one index, need improvements.
@@ -165,8 +177,8 @@ public class IndexerEndpoint {
     @POST
     @GZIP
     @Path("/query")
-    public Response testQuery(Query q) {
-        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(IndexingEngineSingleton.getInstance().handleQuery(q)).build();
+    public Response testQuery(Query q) throws IOException {
+        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(IndexingEngineSingleton.getInstance().handleQuery(q, fileName)).build();
     }
 
 }
