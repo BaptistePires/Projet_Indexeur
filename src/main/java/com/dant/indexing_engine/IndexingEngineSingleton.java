@@ -6,19 +6,25 @@ import com.dant.entity.Table;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import java.io.*;
-import java.nio.file.Paths;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.*;
 
+// TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
+// Will work with only one index currently
 public class IndexingEngineSingleton {
 
     private static final IndexingEngineSingleton INSTANCE;
-    private Table table;
-    Gson gson = new Gson();
 
-    // TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
-    // Will work with only one index currently
-    private Map<Map<String, Object>, List<Integer>> indexedData;
+    private Table table;
+
+	private Map<Map<String, Object>, List<Integer>> indexedData;
+	private ArrayList<Integer> offsets = new ArrayList<>();
+
+	private RandomAccessFile randomAccessFile;
+	private Gson gson = new Gson();
+
     private boolean indexed;
     private boolean indexing;
     private boolean error;
@@ -38,24 +44,9 @@ public class IndexingEngineSingleton {
         return INSTANCE;
     }
 
-    public Table getTable() {
-        return table;
-    }
-
-    public boolean isIndexed() {
-        return indexed;
-    }
-
-    public boolean isAvailable() {
-        return !indexing;
-    }
-
-    public void startIndexing() {
-        String filePath = Paths.get(".", "src", "main", "resources", "csv", "test.csv").toString();
-        File f = new File(filePath);
+	public void startIndexing(String filePath) throws IOException {
+	    randomAccessFile = new RandomAccessFile(filePath, "r");
         try {
-            BufferedReader bf = new BufferedReader(new FileReader(f));
-
             String line;
             String[] splitLine;
 
@@ -63,7 +54,8 @@ public class IndexingEngineSingleton {
             List<Integer> tmpValues;
 
             // Handling header
-            line = bf.readLine();
+            line = randomAccessFile.readLine();
+	        offsets.add((int) randomAccessFile.getFilePointer());
             splitLine = line.split(",");
             for (int i = 0; i < splitLine.length; i++) {
                 table.getColumnByName(splitLine[i]).setColumnNo(i);
@@ -71,9 +63,10 @@ public class IndexingEngineSingleton {
             table.mapColumnsByNo();
 
             int lineno = 1;
-            while ((line = bf.readLine()) != null) {
+            while ((line = randomAccessFile.readLine()) != null) {
                 splitLine = line.split(",", -1);
                 tmpIndexes = new HashMap<>();
+
                 // Get Value of index
                 for (Column c : table.getIndexedColumns()) {
                     tmpIndexes.put(c.getName(), c.castStringToType(splitLine[c.getColumnNo()]));
@@ -84,6 +77,9 @@ public class IndexingEngineSingleton {
 
                 // Add this line number to occurrences
                 tmpValues.add(lineno);
+
+                // Save to offset of this line for queries
+	            offsets.add((int) randomAccessFile.getFilePointer());
                 lineno++;
             }
             indexed = true;
@@ -100,25 +96,9 @@ public class IndexingEngineSingleton {
             System.out.println(e.getMessage());
             e.printStackTrace();
         }
-
-
     }
 
-    public boolean canIndex() {
-        return table.getIndexedColumns().size() > 0 && !indexed && !indexing && !error;
-    }
-
-    public boolean canQuery() {
-        return indexed && !indexing && !error;
-    }
-
-    public List<JsonObject> handleQuery(Query q, String filename) throws IOException {
-        // Getting line offsets from file / O(n) : Can we improve this ?
-        RandomAccessFile randomAccessFile = new RandomAccessFile(filename, "r");
-        ArrayList<Integer> offsets = new ArrayList<>();
-        while (randomAccessFile.readLine() != null)
-            offsets.add((int) randomAccessFile.getFilePointer());
-
+	public List<JsonObject> handleQuery(Query q) {
         JsonObject jsonObject;
         try {
             List<JsonObject> returnedData = new ArrayList<>();
@@ -148,9 +128,28 @@ public class IndexingEngineSingleton {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return Collections.emptyList();
     }
+
+	public Table getTable() {
+		return table;
+	}
+
+	public boolean isIndexed() {
+		return indexed;
+	}
+
+	public boolean isAvailable() {
+		return !indexing;
+	}
+
+	public boolean canIndex() {
+		return table.getIndexedColumns().size() > 0 && !indexed && !indexing && !error;
+	}
+
+	public boolean canQuery() {
+		return indexed && !indexing && !error;
+	}
 
 }
 
