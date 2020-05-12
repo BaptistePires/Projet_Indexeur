@@ -10,6 +10,7 @@ import com.dant.utils.IndexerUtil;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -121,14 +122,11 @@ public class IndexerEndpoint {
 
         Thread t = new Thread() {
 
+            @SneakyThrows
             @Override
             public void run() {
                 super.run();
-	            try {
 		            indexingEngine.startIndexing(uploadedFileName);
-	            } catch (IOException e) {
-		            e.printStackTrace();
-	            }
             }
         };
         t.start();
