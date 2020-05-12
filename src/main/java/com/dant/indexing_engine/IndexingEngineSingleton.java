@@ -44,6 +44,11 @@ public class IndexingEngineSingleton {
         return INSTANCE;
     }
 
+	/**
+	 * Indexes the file and keeps line offsets for future queries
+	 * @param filePath path to .csv file;
+	 * @throws {@link IOException}
+	 */
 	public void startIndexing(String filePath) throws IOException {
 	    randomAccessFile = new RandomAccessFile(filePath, "r");
         try {
@@ -98,6 +103,11 @@ public class IndexingEngineSingleton {
         }
     }
 
+	/**
+	 * For handling a query on the .csv
+	 * @param q : Query object
+	 * @return {@link List<JsonObject>} : Query results
+	 */
 	public List<JsonObject> handleQuery(Query q) {
         JsonObject jsonObject;
         try {
