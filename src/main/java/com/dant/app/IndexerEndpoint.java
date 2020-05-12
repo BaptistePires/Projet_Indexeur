@@ -4,6 +4,7 @@ import com.dant.entity.Column;
 import com.dant.entity.Query;
 import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
+import com.dant.exception.NoDataException;
 import com.dant.exception.UnsupportedTypeException;
 import com.dant.indexing_engine.IndexingEngineSingleton;
 import com.dant.utils.IndexerUtil;
@@ -157,7 +158,7 @@ public class IndexerEndpoint {
     @POST
     @GZIP
     @Path("/query")
-    public Response testQuery(Query q) throws IOException {
+    public Response testQuery(Query q) throws NoDataException {
         return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(IndexingEngineSingleton.getInstance().handleQuery(q)).build();
     }
 

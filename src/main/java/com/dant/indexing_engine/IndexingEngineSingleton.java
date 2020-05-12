@@ -3,6 +3,7 @@ package com.dant.indexing_engine;
 import com.dant.entity.Column;
 import com.dant.entity.Query;
 import com.dant.entity.Table;
+import com.dant.exception.NoDataException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -108,7 +109,7 @@ public class IndexingEngineSingleton {
 	 * @param q : Query object
 	 * @return {@link List<JsonObject>} : Query results
 	 */
-	public List<JsonObject> handleQuery(Query q) {
+	public List<JsonObject> handleQuery(Query q) throws NoDataException {
         JsonObject jsonObject;
         try {
             List<JsonObject> returnedData = new ArrayList<>();
@@ -136,7 +137,7 @@ public class IndexingEngineSingleton {
                 return returnedData;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new NoDataException();
         }
         return Collections.emptyList();
     }
