@@ -4,24 +4,21 @@ import com.dant.entity.Column;
 import com.dant.entity.Query;
 import com.dant.entity.Table;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.io.*;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class IndexingEngineSingleton {
 
     private static final IndexingEngineSingleton INSTANCE;
     private Table table;
+    Gson gson = new Gson();
 
     // TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
     // Will work with only one index currently
-    private Map<Map<String, Object>, List<JsonObject>> indexedData;
+    private Map<Map<String, Object>, List<Integer>> indexedData;
     private boolean indexed;
     private boolean indexing;
     private boolean error;
@@ -63,7 +60,7 @@ public class IndexingEngineSingleton {
             String[] splitLine;
 
             Map<String, Object> tmpIndexes;
-            List<JsonObject> tmpValues;
+            List<Integer> tmpValues;
 
             // Handling header
             line = bf.readLine();
@@ -72,24 +69,22 @@ public class IndexingEngineSingleton {
                 table.getColumnByName(splitLine[i]).setColumnNo(i);
             }
             table.mapColumnsByNo();
-            JsonObject jsonObject;
-            Gson gson = new Gson();
 
+            int lineno = 1;
             while ((line = bf.readLine()) != null) {
                 splitLine = line.split(",", -1);
                 tmpIndexes = new HashMap<>();
+                // Get Value of index
                 for (Column c : table.getIndexedColumns()) {
                     tmpIndexes.put(c.getName(), c.castStringToType(splitLine[c.getColumnNo()]));
                 }
 
+                // Get associated occurrences or new ArrayList if none
                 tmpValues = indexedData.computeIfAbsent(tmpIndexes, k -> new ArrayList<>());
-                jsonObject = new JsonObject();
-                for (int i = 0; i < splitLine.length; i++) {
-                    jsonObject.addProperty(table.getColumnByNo(i).getName(), gson.toJson(table.getColumnByNo(i).castStringToType(splitLine[i]), table.getColumnByNo(i).getType()));
 
-                }
-                tmpValues.add(jsonObject);
-
+                // Add this line number to occurrences
+                tmpValues.add(lineno);
+                lineno++;
             }
             indexed = true;
             indexing = false;
@@ -117,10 +112,17 @@ public class IndexingEngineSingleton {
         return indexed && !indexing && !error;
     }
 
-    public List<JsonObject> handleQuery(Query q) {
+    public List<JsonObject> handleQuery(Query q, String filename) throws IOException {
+        // Getting line offsets from file / O(n) : Can we improve this ?
+        RandomAccessFile randomAccessFile = new RandomAccessFile(filename, "r");
+        ArrayList<Integer> offsets = new ArrayList<>();
+        while (randomAccessFile.readLine() != null)
+            offsets.add((int) randomAccessFile.getFilePointer());
+
+        JsonObject jsonObject;
         try {
             List<JsonObject> returnedData = new ArrayList<>();
-            if (q.getType().toLowerCase().equals("select")) {
+            if (q.getType().equalsIgnoreCase("select")) {
 
                 HashMap<String, Object> tmpIndex = new HashMap<>();
                 for (Map.Entry<String, Map<String, Object>> entry : q.getConditions().entrySet()) {
@@ -129,14 +131,27 @@ public class IndexingEngineSingleton {
                         tmpIndex.put(entry.getKey(), table.getColumnByName(entry.getKey()).castStringToType(entry.getValue().get("value").toString()));
                     }
                 }
-                returnedData.addAll(indexedData.get(tmpIndex));
+                List<Integer> lineNumbers = indexedData.get(tmpIndex);
+
+                for (int lineNumber : lineNumbers) {
+                    randomAccessFile.seek(offsets.get(lineNumber - 1));
+                    String[] splitLine = randomAccessFile.readLine().split(",");
+                    jsonObject = new JsonObject();
+                    for (int i = 0; i < splitLine.length; i++) {
+                        jsonObject.addProperty(table.getColumnByNo(i).getName(), gson.toJson(table.getColumnByNo(i).castStringToType(splitLine[i]), table.getColumnByNo(i).getType()));
+                    }
+                    returnedData.add(jsonObject);
+                }
+
                 return returnedData;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return new ArrayList<>();
 
+        return Collections.emptyList();
     }
 
 }
+
+
