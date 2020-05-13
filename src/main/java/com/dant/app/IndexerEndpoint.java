@@ -50,7 +50,7 @@ public class IndexerEndpoint {
         // TODO : Check duplicated columns
         JsonObject columns = new JsonParser().parse(body).getAsJsonObject();
         for (Map.Entry<String, JsonElement> col : columns.entrySet()) {
-            IndexingEngineSingleton.getInstance().getTable().addColumn(new Column(col.getKey(), col.getValue().getAsString()));
+            indexingEngine.getTable().addColumn(new Column(col.getKey(), col.getValue().getAsString()));
         }
         return Response.status(201).build();
     }
@@ -173,7 +173,28 @@ public class IndexerEndpoint {
     @Path("/query")
     public Response testQuery(Query q) throws NoDataException {
     	log.info("Received " + q.toString());
-        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(queryHandler.handleQuery(q)).build();
+        return Response
+		        .status(200)
+		        .type(MediaType.APPLICATION_JSON_TYPE)
+		        .entity(queryHandler.handleQuery(q))
+		        .build();
+    }
+
+	/**
+	 * Get lines from a query
+	 *
+	 * @param q Query object
+	 * @return Line numbers in CSV instead of actual data
+	 * @throws NoDataException
+	 */
+	@POST
+    @Path("/lines")
+    public Response getLines(Query q) throws NoDataException {
+	    log.info("Received " + q.toString());
+	    return Response.status(200)
+			    .type(MediaType.APPLICATION_JSON_TYPE)
+			    .entity(queryHandler.getResultAsLineNumbers(q))
+			    .build();
     }
 
 

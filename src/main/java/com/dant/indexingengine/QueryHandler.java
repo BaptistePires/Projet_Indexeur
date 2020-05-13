@@ -68,4 +68,28 @@ public class QueryHandler {
 		}
 		return Collections.emptyList();
 	}
+
+	/**
+	 * For testing, returns line numbers of query results, not actual data
+	 */
+	public List<Integer> getResultAsLineNumbers(Query q) throws NoDataException {
+		List<Integer> lineNumbers = new ArrayList<>();
+
+		try {
+			if (q.getType().equalsIgnoreCase("select")) {
+				HashMap<String, Object> tmpIndex = new HashMap<>();
+				for (Map.Entry<String, Map<String, Object>> entry : q.getConditions().entrySet()) {
+
+					if (entry.getValue().get("operator").equals("=")) {
+						tmpIndex.put(entry.getKey(), indexer.getTable().getColumnByName(entry.getKey()).castStringToType(entry.getValue().get("value").toString()));
+					}
+				}
+				lineNumbers = indexer.getIndexedData().get(tmpIndex);
+			}
+		} catch (Exception e) {
+			throw new NoDataException();
+		}
+
+		return lineNumbers;
+	}
 }
