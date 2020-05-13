@@ -13,6 +13,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -33,6 +34,7 @@ import java.util.Set;
 @Path("/indexer")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Slf4j
 public class IndexerEndpoint {
 
     private IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
@@ -113,6 +115,7 @@ public class IndexerEndpoint {
                 e.printStackTrace();
             }
         }
+        log.info("Uploaded file to " + location);
         return Response.status(200).entity("Uploaded file to : " + location).build();
     }
 
@@ -129,7 +132,9 @@ public class IndexerEndpoint {
             @Override
             public void run() {
                 super.run();
-		            indexingEngine.startIndexing(uploadedFileName);
+                log.info("Indexing started");
+                indexingEngine.startIndexing(uploadedFileName);
+                log.info("Finished indexing file " + uploadedFileName);
             }
         };
         t.start();
@@ -161,6 +166,7 @@ public class IndexerEndpoint {
     @GZIP
     @Path("/query")
     public Response testQuery(Query q) throws NoDataException {
+    	log.info("Received " + q.toString());
         return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(queryHandler.handleQuery(q)).build();
     }
 
