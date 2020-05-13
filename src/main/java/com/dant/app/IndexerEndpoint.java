@@ -6,7 +6,7 @@ import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
 import com.dant.exception.NoDataException;
 import com.dant.exception.UnsupportedTypeException;
-import com.dant.indexing_engine.IndexingEngineSingleton;
+import com.dant.indexingengine.IndexingEngineSingleton;
 import com.dant.utils.IndexerUtil;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

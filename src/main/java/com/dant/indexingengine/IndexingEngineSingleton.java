@@ -1,4 +1,4 @@
-package com.dant.indexing_engine;
+package com.dant.indexingengine;
 
 import com.dant.entity.Column;
 import com.dant.entity.Query;
