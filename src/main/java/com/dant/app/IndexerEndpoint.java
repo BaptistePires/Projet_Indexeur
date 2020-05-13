@@ -7,6 +7,7 @@ import com.dant.exception.InvalidIndexException;
 import com.dant.exception.NoDataException;
 import com.dant.exception.UnsupportedTypeException;
 import com.dant.indexingengine.IndexingEngineSingleton;
+import com.dant.indexingengine.QueryHandler;
 import com.dant.utils.IndexerUtil;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -34,8 +35,9 @@ import java.util.Set;
 @Consumes(MediaType.APPLICATION_JSON)
 public class IndexerEndpoint {
 
-    IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
-    static String uploadedFileName = "";
+    private IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
+    private QueryHandler queryHandler = QueryHandler.getInstance();
+    private static String uploadedFileName = "";
 
     // POST
     @POST
@@ -159,7 +161,7 @@ public class IndexerEndpoint {
     @GZIP
     @Path("/query")
     public Response testQuery(Query q) throws NoDataException {
-        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(IndexingEngineSingleton.getInstance().handleQuery(q)).build();
+        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(queryHandler.handleQuery(q)).build();
     }
 
 

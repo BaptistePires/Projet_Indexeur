@@ -1,19 +1,21 @@
 package com.dant.indexingengine;
 
 import com.dant.entity.Column;
-import com.dant.entity.Query;
 import com.dant.entity.Table;
-import com.dant.exception.NoDataException;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import lombok.Data;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 // TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
 // Will work with only one index currently
+@Data
 public class IndexingEngineSingleton {
 
     private static final IndexingEngineSingleton INSTANCE;
@@ -25,6 +27,7 @@ public class IndexingEngineSingleton {
 
 	private RandomAccessFile randomAccessFile;
 	private Gson gson = new Gson();
+	private String filePath;
 
     private boolean indexed;
     private boolean indexing;
@@ -51,6 +54,7 @@ public class IndexingEngineSingleton {
 	 * @throws {@link IOException}
 	 */
 	public void startIndexing(String filePath) throws IOException {
+		this.filePath = filePath;
 	    randomAccessFile = new RandomAccessFile(filePath, "r");
         try {
             String line;
@@ -104,44 +108,6 @@ public class IndexingEngineSingleton {
         }
     }
 
-	/**
-	 * For handling a query on the .csv
-	 * @param q : Query object
-	 * @return {@link List<JsonObject>} : Query results
-	 */
-	public List<JsonObject> handleQuery(Query q) throws NoDataException {
-        JsonObject jsonObject;
-        try {
-            List<JsonObject> returnedData = new ArrayList<>();
-            if (q.getType().equalsIgnoreCase("select")) {
-
-                HashMap<String, Object> tmpIndex = new HashMap<>();
-                for (Map.Entry<String, Map<String, Object>> entry : q.getConditions().entrySet()) {
-
-                    if (entry.getValue().get("operator").equals("=")) {
-                        tmpIndex.put(entry.getKey(), table.getColumnByName(entry.getKey()).castStringToType(entry.getValue().get("value").toString()));
-                    }
-                }
-                List<Integer> lineNumbers = indexedData.get(tmpIndex);
-
-                for (int lineNumber : lineNumbers) {
-                    randomAccessFile.seek(offsets.get(lineNumber - 1));
-                    String[] splitLine = randomAccessFile.readLine().split(",");
-                    jsonObject = new JsonObject();
-                    for (int i = 0; i < splitLine.length; i++) {
-                        jsonObject.addProperty(table.getColumnByNo(i).getName(), gson.toJson(table.getColumnByNo(i).castStringToType(splitLine[i]), table.getColumnByNo(i).getType()));
-                    }
-                    returnedData.add(jsonObject);
-                }
-
-                return returnedData;
-            }
-        } catch (Exception e) {
-            throw new NoDataException();
-        }
-        return Collections.emptyList();
-    }
-
 	public Table getTable() {
 		return table;
 	}
@@ -155,7 +121,7 @@ public class IndexingEngineSingleton {
 	}
 
 	public boolean canIndex() {
-		return table.getIndexedColumns().size() > 0 && !indexed && !indexing && !error;
+		return !table.getIndexedColumns().isEmpty() && !indexed && !indexing && !error;
 	}
 
 	public boolean canQuery() {
