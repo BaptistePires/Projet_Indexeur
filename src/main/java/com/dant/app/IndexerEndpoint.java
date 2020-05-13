@@ -26,6 +26,8 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +41,7 @@ public class IndexerEndpoint {
 
     private IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
     private QueryHandler queryHandler = QueryHandler.getInstance();
-    private static String uploadedFileName = "";
+    private static String uploadedFilePath = "";
 
     // POST
     @POST
@@ -106,7 +108,7 @@ public class IndexerEndpoint {
 
 		            // to path
 		            location = Paths.get(".", "src", "main", "resources", "csv", fileName).toString();
-                    uploadedFileName = location;
+                    uploadedFilePath = location;
 
 		            // saving
 		            IndexerUtil.saveFile(bytes, location);
@@ -119,27 +121,31 @@ public class IndexerEndpoint {
         return Response.status(200).entity("Uploaded file to : " + location).build();
     }
 
-    @POST
-    @Path("/startIndexing")
-    public Response startIndexing() {
-        if (!indexingEngine.canIndex()) {
-            return Response.status(403).entity("IndexingEngine is not ready to process your data").build();
-        }
+	@POST
+	@Path("/startIndexing")
+	public Response startIndexing() {
+		if (!indexingEngine.canIndex()) {
+			return Response.status(403).entity("IndexingEngine is not ready to process your data").build();
+		}
 
-        Thread t = new Thread() {
+		Thread t = new Thread() {
 
-            @SneakyThrows
-            @Override
-            public void run() {
-                super.run();
-                log.info("Indexing started");
-                indexingEngine.startIndexing(uploadedFileName);
-                log.info("Finished indexing file " + uploadedFileName);
-            }
-        };
-        t.start();
-        return Response.status(200).entity("Indexing started").build();
-    }
+			@SneakyThrows
+			@Override
+			public void run() {
+				super.run();
+				log.info("Indexing started at "
+						+ DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").format(LocalDateTime.now())
+				);
+				indexingEngine.startIndexing(uploadedFilePath);
+				log.info("Finished indexing file at "
+						+ DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").format(LocalDateTime.now())
+				);
+			}
+		};
+		t.start();
+		return Response.status(200).entity("Indexing started").build();
+	}
 
 
     /**
