@@ -40,6 +40,7 @@
 
 	<properties>
 		<resteasy.version>3.0.14.Final</resteasy.version>
+		<slf4jVersion>1.7.30</slf4jVersion>
 	</properties>
 
 	<dependencies>
@@ -98,9 +99,30 @@
 			<version>2.1.1</version>
 		</dependency>
 
+		<!-- LOMBOK -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.12</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- SLF4J -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4jVersion}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>${slf4jVersion}</version>
+		</dependency>
+
+
 	</dependencies>
 	<build>
-<!--		<finalName>dant</finalName>-->
+		<!--		<finalName>dant</finalName>-->
 
 		<plugins>
 			<plugin>

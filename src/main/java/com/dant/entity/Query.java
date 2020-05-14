@@ -47,14 +47,14 @@ public class Query {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Query \n -------");
+        sb.append("Query \n ------- ");
         sb.append("Type    : ").append(type).append("\n");
         sb.append("Columns : ").append(cols).append("\n");
         sb.append("Conditions : ").append("\n");
         for (Map.Entry<String, Map<String, Object>> e : conditions.entrySet()) {
-            sb.append("     ").append(e.getKey());
+            sb.append("\t").append(e.getKey()).append("\n");
             for (Map.Entry<String, Object> subEntry : e.getValue().entrySet()) {
-                sb.append("         ").append(subEntry.getKey()).append(" : ").append(subEntry.getValue()).append("\n");
+                sb.append("\t\t").append(subEntry.getKey()).append(" : ").append(subEntry.getValue()).append("\n");
             }
         }
         return sb.toString();

@@ -4,12 +4,16 @@ import com.dant.entity.Column;
 import com.dant.entity.Query;
 import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
+import com.dant.exception.NoDataException;
 import com.dant.exception.UnsupportedTypeException;
-import com.dant.indexing_engine.IndexingEngineSingleton;
+import com.dant.indexingengine.IndexingEngineSingleton;
+import com.dant.indexingengine.QueryHandler;
 import com.dant.utils.IndexerUtil;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -22,6 +26,8 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,27 +36,23 @@ import java.util.Set;
 @Path("/indexer")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Slf4j
 public class IndexerEndpoint {
 
-    IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
+    private IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
+    private QueryHandler queryHandler = QueryHandler.getInstance();
+    private static String uploadedFilePath = "";
 
-
+    // POST
     @POST
     @Path("/createTable")
     public Response createTable(String body) throws UnsupportedTypeException {
         // TODO : Check duplicated columns
         JsonObject columns = new JsonParser().parse(body).getAsJsonObject();
         for (Map.Entry<String, JsonElement> col : columns.entrySet()) {
-            IndexingEngineSingleton.getInstance().getTable().addColumn(new Column(col.getKey(), col.getValue().getAsString()));
+            indexingEngine.getTable().addColumn(new Column(col.getKey(), col.getValue().getAsString()));
         }
         return Response.status(201).build();
-    }
-
-
-    @GET
-    @Path("/showTable")
-    public Set<Column> showTable() {
-        return IndexingEngineSingleton.getInstance().getTable().getColumns();
     }
 
 
@@ -84,13 +86,6 @@ public class IndexerEndpoint {
     }
 
 
-    @GET
-    @Path("/showIndex")
-    public Set<Column> showIndex() {
-        return IndexingEngineSingleton.getInstance().getTable().getIndexedColumns();
-    }
-
-
     @POST
     @Path("/uploadData")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -113,6 +108,7 @@ public class IndexerEndpoint {
 
 		            // to path
 		            location = Paths.get(".", "src", "main", "resources", "csv", fileName).toString();
+                    uploadedFilePath = location;
 
 		            // saving
 		            IndexerUtil.saveFile(bytes, location);
@@ -121,41 +117,51 @@ public class IndexerEndpoint {
                 e.printStackTrace();
             }
         }
+        log.info("Uploaded file to " + location);
         return Response.status(200).entity("Uploaded file to : " + location).build();
     }
 
-    @POST
-    @Path("/startIndexing")
-    public Response startIndexing() {
-        if (!indexingEngine.canIndex()) {
-            return Response.status(403).entity("IndexingEngine is not ready to process your data").build();
-        }
+	@POST
+	@Path("/startIndexing")
+	public Response startIndexing() {
+		if (!indexingEngine.canIndex()) {
+			return Response.status(403).entity("IndexingEngine is not ready to process your data").build();
+		}
 
-        Thread t = new Thread() {
+		Thread t = new Thread() {
 
-            @Override
-            public void run() {
-                super.run();
-                indexingEngine.startIndexing();
-            }
-        };
-        t.start();
-        return Response.status(200).entity("Indexing stated").build();
-    }
+			@SneakyThrows
+			@Override
+			public void run() {
+				super.run();
+				log.info("Indexing started at "
+						+ DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").format(LocalDateTime.now())
+				);
+				indexingEngine.startIndexing(uploadedFilePath);
+				log.info("Finished indexing file at "
+						+ DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").format(LocalDateTime.now())
+				);
+			}
+		};
+		t.start();
+		return Response.status(200).entity("Indexing started").build();
+	}
+
 
     /**
      *
      * @param q Query object, must be like :
      *
-     * 	            {"type": "SELECT",
-     * 	             "cols": ["VendorID"],
-     * 		         "conditions": {
-     *                  "VendorID": {
-     * 				        "operator": "=",
-     * 				        "value": 2
-     *                        }
-     *               }
-     *               }
+     * 	            {
+     * 	                "type": "SELECT",
+     * 	                "cols": ["VendorID"],
+     * 		            "conditions": {
+     *                      "VendorID": {
+     * 				            "operator": "=",
+     * 				            "value": 2
+     * 			            }
+     *                  }
+     *              }
      *
      *
      *          Currently only support one index, need improvements.
@@ -165,8 +171,54 @@ public class IndexerEndpoint {
     @POST
     @GZIP
     @Path("/query")
-    public Response testQuery(Query q) {
-        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(IndexingEngineSingleton.getInstance().handleQuery(q)).build();
+    public Response testQuery(Query q) throws NoDataException {
+    	log.info("Received " + q.toString());
+        return Response
+		        .status(200)
+		        .type(MediaType.APPLICATION_JSON_TYPE)
+		        .entity(queryHandler.handleQuery(q))
+		        .build();
     }
+
+	/**
+	 * Get lines from a query
+	 *
+	 * @param q Query object
+	 * @return Line numbers in CSV instead of actual data
+	 * @throws NoDataException
+	 */
+	@POST
+    @Path("/lines")
+    public Response getLines(Query q) throws NoDataException {
+	    log.info("Received " + q.toString());
+	    return Response.status(200)
+			    .type(MediaType.APPLICATION_JSON_TYPE)
+			    .entity(queryHandler.getResultAsLineNumbers(q))
+			    .build();
+    }
+
+
+    // GET
+	@GET
+	@Path("/showTable")
+	public Set<Column> showTable() {
+		return IndexingEngineSingleton.getInstance().getTable().getColumns();
+	}
+
+	@GET
+	@Path("/showIndex")
+	public Set<Column> showIndex() {
+		return IndexingEngineSingleton.getInstance().getTable().getIndexedColumns();
+	}
+
+	@GET
+	@Path("/getState")
+	public Response getState() {
+		String canIndex = indexingEngine.canIndex() ? "YES" : "NO";
+		String canQuery = indexingEngine.canQuery() ? "YES" : "NO";
+		return Response.status(200)
+				.entity("State :\n\tCan Index : " + canIndex + "\n\tCan query : " + canQuery)
+				.build();
+	}
 
 }
