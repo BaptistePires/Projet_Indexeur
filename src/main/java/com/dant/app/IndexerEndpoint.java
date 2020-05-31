@@ -2,6 +2,7 @@ package com.dant.app;
 
 import com.dant.entity.Column;
 import com.dant.entity.Query;
+import com.dant.entity.Table;
 import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
 import com.dant.exception.NoDataException;
@@ -49,7 +50,18 @@ public class IndexerEndpoint {
     public Response createTable(String body) throws UnsupportedTypeException {
         // TODO : Check duplicated columns
         JsonObject columns = new JsonParser().parse(body).getAsJsonObject();
-        for (Map.Entry<String, JsonElement> col : columns.entrySet()) {
+
+        // Setting name
+		String tableName;
+		try{
+        	tableName = columns.get("name").getAsString();
+		}catch (Exception e) {
+			tableName = "default";
+		}
+		indexingEngine.getTable().setName(tableName);
+
+		// Setting up columns
+        for (Map.Entry<String, JsonElement> col : columns.get("columns").getAsJsonObject().entrySet()) {
             indexingEngine.getTable().addColumn(new Column(col.getKey(), col.getValue().getAsString()));
         }
         return Response.status(201).build();
@@ -201,8 +213,8 @@ public class IndexerEndpoint {
     // GET
 	@GET
 	@Path("/showTable")
-	public Set<Column> showTable() {
-		return IndexingEngineSingleton.getInstance().getTable().getColumns();
+	public Table showTable() {
+		return IndexingEngineSingleton.getInstance().getTable();
 	}
 
 	@GET

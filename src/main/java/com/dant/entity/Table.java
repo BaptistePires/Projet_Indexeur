@@ -30,11 +30,15 @@ public class Table implements Serializable {
     @Expose
     private Set<Column> indexes;
 
+    @Expose
+    private String name;
+
     public Table() {
         columns = new HashSet<>();
         columnsMappedByName = new HashMap<>();
         columnsMappedByNo = new HashMap<>();
         indexes = new HashSet<>();
+        name = "";
     }
 
     public void addColumn(Column c) {
@@ -84,6 +88,14 @@ public class Table implements Serializable {
 
     public Column getColumnByNo(int no) {
         return columnsMappedByNo.get(no);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     /**
