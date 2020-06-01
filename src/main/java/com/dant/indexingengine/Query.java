@@ -1,4 +1,4 @@
-package com.dant.entity;
+package com.dant.indexingengine;
 
 import com.google.gson.annotations.Expose;
 

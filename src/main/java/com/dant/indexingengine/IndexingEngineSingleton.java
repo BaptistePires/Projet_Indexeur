@@ -1,11 +1,8 @@
 package com.dant.indexingengine;
 
-import com.dant.entity.Column;
-import com.dant.entity.Table;
 import com.google.gson.Gson;
 import lombok.Data;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -20,7 +17,7 @@ public class IndexingEngineSingleton {
 
     private static final IndexingEngineSingleton INSTANCE;
 
-    private Table table;
+    private ArrayList<Table> tables;
 
 	private Map<Map<String, Object>, List<Integer>> indexedData;
 	private ArrayList<Integer> offsets = new ArrayList<>();
@@ -38,7 +35,7 @@ public class IndexingEngineSingleton {
     }
 
     private IndexingEngineSingleton() {
-        table = new Table();
+        tables = new ArrayList<>();
         indexed = false;
         indexing = false;
         indexedData = new HashMap<>();
@@ -54,63 +51,72 @@ public class IndexingEngineSingleton {
 	 * @throws {@link IOException}
 	 */
 	public void startIndexing(String filePath) throws IOException {
-		this.filePath = filePath;
-	    randomAccessFile = new RandomAccessFile(filePath, "r");
-        try {
-            String line;
-            String[] splitLine;
-
-            Map<String, Object> tmpIndexes;
-            List<Integer> tmpValues;
-
-            // Handling header
-            line = randomAccessFile.readLine();
-	        offsets.add((int) randomAccessFile.getFilePointer());
-            splitLine = line.split(",");
-            for (int i = 0; i < splitLine.length; i++) {
-                table.getColumnByName(splitLine[i]).setColumnNo(i);
-            }
-            table.mapColumnsByNo();
-
-            int lineno = 1;
-            while ((line = randomAccessFile.readLine()) != null) {
-                splitLine = line.split(",", -1);
-                tmpIndexes = new HashMap<>();
-
-                // Get Value of index
-                for (Column c : table.getIndexedColumns()) {
-                    tmpIndexes.put(c.getName(), c.castStringToType(splitLine[c.getColumnNo()]));
-                }
-
-                // Get associated occurrences or new ArrayList if none
-                tmpValues = indexedData.computeIfAbsent(tmpIndexes, k -> new ArrayList<>());
-
-                // Add this line number to occurrences
-                tmpValues.add(lineno);
-
-                // Save to offset of this line for queries
-	            offsets.add((int) randomAccessFile.getFilePointer());
-                lineno++;
-            }
-            indexed = true;
-            indexing = false;
-            error = false;
-
-        } catch (FileNotFoundException e) {
-            // TODO : tmp -> handle errors
-            e.printStackTrace();
-            System.out.println();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            e.printStackTrace();
-        }
+//		this.filePath = filePath;
+//	    randomAccessFile = new RandomAccessFile(filePath, "r");
+//        try {
+//            String line;
+//            String[] splitLine;
+//
+//            Map<String, Object> tmpIndexes;
+//            List<Integer> tmpValues;
+//
+//            // Handling header
+//            line = randomAccessFile.readLine();
+//	        offsets.add((int) randomAccessFile.getFilePointer());
+//            splitLine = line.split(",");
+//            for (int i = 0; i < splitLine.length; i++) {
+//                table.getColumnByName(splitLine[i]).setColumnNo(i);
+//            }
+//            table.mapColumnsByNo();
+//
+//            int lineno = 1;
+//            while ((line = randomAccessFile.readLine()) != null) {
+//                splitLine = line.split(",", -1);
+//                tmpIndexes = new HashMap<>();
+//
+//                // Get Value of index
+//                for (Column c : table.getIndexedColumns()) {
+//                    tmpIndexes.put(c.getName(), c.castStringToType(splitLine[c.getColumnNo()]));
+//                }
+//
+//                // Get associated occurrences or new ArrayList if none
+//                tmpValues = indexedData.computeIfAbsent(tmpIndexes, k -> new ArrayList<>());
+//
+//                // Add this line number to occurrences
+//                tmpValues.add(lineno);
+//
+//                // Save to offset of this line for queries
+//	            offsets.add((int) randomAccessFile.getFilePointer());
+//                lineno++;
+//            }
+//            indexed = true;
+//            indexing = false;
+//            error = false;
+//
+//        } catch (FileNotFoundException e) {
+//            // TODO : tmp -> handle errors
+//            e.printStackTrace();
+//            System.out.println();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (Exception e) {
+//            System.out.println(e.getMessage());
+//            e.printStackTrace();
+//        }
     }
 
-	public Table getTable() {
-		return table;
+	public ArrayList<Table> getTables() {
+		return tables;
 	}
+
+	public Table getTableByName(String name) throws Exception {
+	    for(Table t: tables) {
+	        if(t.getName().equals(name)){
+	            return t;
+            }
+        }
+	    throw new Exception("Unknow table");
+    }
 
 	public boolean isIndexed() {
 		return indexed;
@@ -121,8 +127,8 @@ public class IndexingEngineSingleton {
 	}
 
 	public boolean canIndex() {
-		return !table.getIndexedColumns().isEmpty() && !indexed && !indexing && !error;
-	}
+        return true;
+    }
 
 	public boolean canQuery() {
 		return indexed && !indexing && !error;
