@@ -13,8 +13,6 @@ import com.dant.utils.IndexerUtil;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
@@ -37,7 +35,6 @@ import java.util.Set;
 @Path("/indexer")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Slf4j
 public class IndexerEndpoint {
 
     private IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
@@ -129,7 +126,7 @@ public class IndexerEndpoint {
                 e.printStackTrace();
             }
         }
-        log.info("Uploaded file to " + location);
+        System.out.println("Uploaded file to " + location);
         return Response.status(200).entity("Uploaded file to : " + location).build();
     }
 
@@ -142,15 +139,18 @@ public class IndexerEndpoint {
 
 		Thread t = new Thread() {
 
-			@SneakyThrows
 			@Override
 			public void run() {
 				super.run();
-				log.info("Indexing started at "
+				System.out.println("Indexing started at "
 						+ DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").format(LocalDateTime.now())
 				);
-				indexingEngine.startIndexing(uploadedFilePath);
-				log.info("Finished indexing file at "
+				try {
+					indexingEngine.startIndexing(uploadedFilePath);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				System.out.println("Finished indexing file at "
 						+ DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").format(LocalDateTime.now())
 				);
 			}
@@ -184,7 +184,7 @@ public class IndexerEndpoint {
     @GZIP
     @Path("/query")
     public Response testQuery(Query q) throws NoDataException {
-    	log.info("Received " + q.toString());
+	    System.out.println("Received " + q.toString());
         return Response
 		        .status(200)
 		        .type(MediaType.APPLICATION_JSON_TYPE)
@@ -202,7 +202,7 @@ public class IndexerEndpoint {
 	@POST
     @Path("/lines")
     public Response getLines(Query q) throws NoDataException {
-	    log.info("Received " + q.toString());
+		System.out.println("Received " + q.toString());
 	    return Response.status(200)
 			    .type(MediaType.APPLICATION_JSON_TYPE)
 			    .entity(queryHandler.getResultAsLineNumbers(q))

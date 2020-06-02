@@ -3,7 +3,6 @@ package com.dant.indexingengine;
 import com.dant.entity.Column;
 import com.dant.entity.Table;
 import com.google.gson.Gson;
-import lombok.Data;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -15,7 +14,6 @@ import java.util.Map;
 
 // TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
 // Will work with only one index currently
-@Data
 public class IndexingEngineSingleton {
 
     private static final IndexingEngineSingleton INSTANCE;
@@ -128,6 +126,21 @@ public class IndexingEngineSingleton {
 		return indexed && !indexing && !error;
 	}
 
+	public ArrayList<Integer> getOffsets() {
+		return offsets;
+	}
+
+	public RandomAccessFile getRandomAccessFile() {
+		return randomAccessFile;
+	}
+
+	public Gson getGson() {
+		return gson;
+	}
+
+	public Map<Map<String, Object>, List<Integer>> getIndexedData() {
+		return indexedData;
+	}
 }
 
 
