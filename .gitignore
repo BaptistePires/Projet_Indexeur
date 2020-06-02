@@ -82,4 +82,4 @@ src/main/resources/csv/*.csv
 
 # Except
 !src/main/resources/csv/test.csv
-/src/main/resources/csv/unit_tests.csv
+!src/main/resources/csv/unit_tests.csv
