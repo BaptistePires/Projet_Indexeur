@@ -1,15 +1,12 @@
 package com.dant.app;
 
-import com.dant.indexingengine.Column;
-import com.dant.indexingengine.Query;
-import com.dant.indexingengine.Table;
+import com.dant.indexingengine.*;
 import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
 import com.dant.exception.NoDataException;
 import com.dant.exception.UnsupportedTypeException;
-import com.dant.indexingengine.IndexingEngineSingleton;
-import com.dant.indexingengine.QueryHandler;
 import com.dant.utils.IndexerUtil;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -45,37 +42,58 @@ public class IndexerEndpoint {
 	@POST
 	@Path("/createTable")
 	public Response createTable(String body) throws UnsupportedTypeException {
-		// TODO : Check duplicated columns
-		JsonObject columns = new JsonParser().parse(body).getAsJsonObject();
+		JsonObject tableData = new JsonParser().parse(body).getAsJsonObject();
 
 		// Setting up name
 		String tableName;
 		try{
-			tableName = columns.get("name").getAsString();
+			tableName = tableData.get("name").getAsString();
 		}catch (Exception e) {
 			tableName = "default";
 		}
 
-//		indexingEngine.getTable().setName(tableName);
+		Table table = new Table(tableName);
 
 		// Setting up columns
-		for (Map.Entry<String, JsonElement> col : columns.get("columns").getAsJsonObject().entrySet()) {
-//            indexingEngine.getTable().addColumn(new Column(col.getKey(), col.getValue().getAsString()));
+		Column c;
+		for (Map.Entry<String, JsonElement> col : tableData.get("columns").getAsJsonObject().entrySet()) {
+			String type = col.getValue().getAsString().toLowerCase();
+			switch (type) {
+				case "integer":
+					c = new IntegerColumn(col.getKey());
+					break;
+
+				case "string":
+					c = new StringColumn(col.getKey());
+					break;
+
+				default:
+					c = new StringColumn(col.getKey());
+			}
+			table.addColumn(c);
 		}
-		return Response.status(201).build();
+		indexingEngine.addTable(table);
+
+		return Response.status(201).entity("Table created").build();
 	}
 
 
 	/**
 	 * Method that create the indexes for a table.
 	 *
-	 * @param indexesToAdd List that contains names of columns that need be indexed
 	 * @return {@link Response}
 	 * @throws {@link InvalidIndexException} InvalidIndexException If an index provided does not exist.
 	 */
 	@POST
 	@Path("/addIndexes")
-	public Response addIndex(List<String> indexesToAdd) throws InvalidIndexException {
+	public Response addIndex(String body) throws Exception {
+		JsonObject indexInfo = new JsonParser().parse(body).getAsJsonObject();
+		Table t = indexingEngine.getTableByName(indexInfo.get("tableName").getAsString());
+		JsonArray indexedColumn = indexInfo.get("indexes").getAsJsonArray();
+		System.out.println(indexedColumn);
+		for(int i = 0; i < indexedColumn.size(); i++) {
+			t.addIndexByName(indexedColumn.get(i).getAsString());
+		}
 		// Before inserting indexes, we must check data integrity
 //		if (indexesToAdd.size() > IndexingEngineSingleton.getInstance().getTable().getColumns().size())
 //			throw new InvalidIndexException("You provided more indexes" +
@@ -134,7 +152,7 @@ public class IndexerEndpoint {
 
 	@POST
 	@Path("/startIndexing")
-	public Response startIndexing() {
+	public Response startIndexing() throws IOException {
 //		if (!indexingEngine.canIndex()) {
 //			return Response.status(403).entity("IndexingEngine is not ready to process your data").build();
 //		}
@@ -155,6 +173,7 @@ public class IndexerEndpoint {
 //			}
 //		};
 //		t.start();
+		indexingEngine.startIndexing("", "TableName");
 		return Response.status(200).entity("Indexing started").build();
 	}
 

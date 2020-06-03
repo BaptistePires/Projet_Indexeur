@@ -1,14 +1,15 @@
 package com.dant.indexingengine;
 
 import com.google.gson.Gson;
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
 import lombok.Data;
+import org.apache.commons.lang3.SerializationUtils;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.lang.reflect.Array;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 // TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
 // Will work with only one index currently
@@ -18,11 +19,8 @@ public class IndexingEngineSingleton {
     private static final IndexingEngineSingleton INSTANCE;
 
     private ArrayList<Table> tables;
+	private ArrayList<int[]> data;
 
-	private Map<Map<String, Object>, List<Integer>> indexedData;
-	private ArrayList<Integer> offsets = new ArrayList<>();
-
-	private RandomAccessFile randomAccessFile;
 	private Gson gson = new Gson();
 	private String filePath;
 
@@ -38,7 +36,7 @@ public class IndexingEngineSingleton {
         tables = new ArrayList<>();
         indexed = false;
         indexing = false;
-        indexedData = new HashMap<>();
+        data = new ArrayList<>();
     }
 
     public static IndexingEngineSingleton getInstance() {
@@ -50,73 +48,107 @@ public class IndexingEngineSingleton {
 	 * @param filePath path to .csv file;
 	 * @throws {@link IOException}
 	 */
-	public void startIndexing(String filePath) throws IOException {
-//		this.filePath = filePath;
-//	    randomAccessFile = new RandomAccessFile(filePath, "r");
-//        try {
-//            String line;
-//            String[] splitLine;
-//
-//            Map<String, Object> tmpIndexes;
-//            List<Integer> tmpValues;
-//
-//            // Handling header
-//            line = randomAccessFile.readLine();
-//	        offsets.add((int) randomAccessFile.getFilePointer());
-//            splitLine = line.split(",");
-//            for (int i = 0; i < splitLine.length; i++) {
-//                table.getColumnByName(splitLine[i]).setColumnNo(i);
-//            }
-//            table.mapColumnsByNo();
-//
-//            int lineno = 1;
-//            while ((line = randomAccessFile.readLine()) != null) {
-//                splitLine = line.split(",", -1);
-//                tmpIndexes = new HashMap<>();
-//
-//                // Get Value of index
-//                for (Column c : table.getIndexedColumns()) {
-//                    tmpIndexes.put(c.getName(), c.castStringToType(splitLine[c.getColumnNo()]));
-//                }
-//
-//                // Get associated occurrences or new ArrayList if none
-//                tmpValues = indexedData.computeIfAbsent(tmpIndexes, k -> new ArrayList<>());
-//
-//                // Add this line number to occurrences
-//                tmpValues.add(lineno);
-//
-//                // Save to offset of this line for queries
-//	            offsets.add((int) randomAccessFile.getFilePointer());
-//                lineno++;
-//            }
-//            indexed = true;
-//            indexing = false;
-//            error = false;
-//
-//        } catch (FileNotFoundException e) {
-//            // TODO : tmp -> handle errors
-//            e.printStackTrace();
-//            System.out.println();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//            e.printStackTrace();
-//        }
+	public void startIndexing(String filePath, String tableName) throws IOException {
+		// Files related vars
+		String fileName = "src/main/resources/csv/test.csv";
+		FileInputStream fis = new FileInputStream(fileName);
+		InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+		CSVReader reader = new CSVReader(isr);
+		ByteArrayOutputStream  bos = new ByteArrayOutputStream();
+		ObjectOutputStream objectOutputStream = new ObjectOutputStream(bos);
+
+		// Reading CSV vars
+		String[] lineArray;
+		String line;
+		Object[] castedLine;
+		int i, headerLength;
+
+		Table t;
+		if((t = getTableByName(tableName)) == null) return;
+
+		// Saving vars
+		String savePath = "src/main/resources/csv/saved.bin";
+		int[] linePositions;
+		byte[] dataBytes;
+		int lineCounter = 0;
+		RandomAccessFile saveFile = new RandomAccessFile(savePath, "rw");
+
+
+		try {
+			lineArray = reader.readNext();
+			headerLength = lineArray.length;
+			if(lineArray.length != getTableByName(tableName).getColumns().size()) {
+				System.out.println("Error, the file provided does not correspond to the table;");
+				return;
+			}
+
+			// Setting up columns No
+			for(i = 0; i < headerLength; i++) {
+				t.getColumnByName(lineArray[i]).setColumnNo(i);
+			}
+			t.mapColumnsByNo();
+
+
+			while((lineArray = reader.readNext()) != null) {
+
+				// Cast data
+				castedLine = new Object[headerLength];
+				for(i = 0; i < headerLength; i++) {
+					castedLine[i] = t.getColumnByNo(i).castAndUpdateMetaData(lineArray[i]);
+				}
+
+				// Serialize data
+				dataBytes = SerializationUtils.serialize(castedLine);
+				linePositions = new int[2];
+				if(lineCounter != 0) {
+					linePositions[0] = data.get(lineCounter - 1)[0] + data.get(lineCounter -1 )[1];
+				}
+				linePositions[1] = dataBytes.length;
+				data.add(linePositions);
+				saveFile.write(dataBytes);
+				lineCounter++;
+			}
+
+			// Debug, will be removed
+			byte[] read;
+			for(i = 0; i < lineCounter; i++) {
+				saveFile.seek(data.get(i)[0]);
+				read = new byte[data.get(i)[1]];
+				saveFile.read(read, 0, data.get(i)[1]);
+				Object[] o = SerializationUtils.deserialize(read);
+//				System.out.println(Arrays.toString(o));
+			}
+
+		} catch (CsvValidationException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			// ->>> t.mapColumnByNo; handle exception better
+			e.printStackTrace();
+		}
+		finally {
+			objectOutputStream.close();
+			saveFile.close();
+
+		}
+
     }
 
 	public ArrayList<Table> getTables() {
 		return tables;
 	}
 
-	public Table getTableByName(String name) throws Exception {
+	public Table getTableByName(String name)  {
 	    for(Table t: tables) {
 	        if(t.getName().equals(name)){
 	            return t;
             }
         }
-	    throw new Exception("Unknow table");
+	    return null;
     }
+
+    public void addTable(Table t) {
+		this.tables.add(t);
+	}
 
 	public boolean isIndexed() {
 		return indexed;

@@ -34,11 +34,15 @@ public class Table implements Serializable {
     private String name;
 
     public Table() {
+        this("");
+    }
+
+    public Table(String name) {
         columns = new HashSet<>();
         columnsMappedByName = new HashMap<>();
         columnsMappedByNo = new HashMap<>();
         indexes = new HashSet<>();
-        name = "";
+        this.name = name;
     }
 
     public void addColumn(Column c) {

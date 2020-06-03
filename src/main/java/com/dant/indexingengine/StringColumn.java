@@ -4,17 +4,14 @@ import com.dant.exception.UnsupportedTypeException;
 
 public class StringColumn extends Column {
 
-    public StringColumn(String name, String type) throws UnsupportedTypeException {
-        super(name, type);
+    public StringColumn(String name) throws UnsupportedTypeException {
+        super(name);
     }
 
     @Override
-    public Object insert(String s, int index) {
-        return null;
+    public Object castAndUpdateMetaData(String o) {
+        return o;
     }
 
-    @Override
-    public Object get(int i) {
-        return null;
-    }
+
 }
