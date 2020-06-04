@@ -19,10 +19,8 @@ public class IndexingEngineSingleton {
     private static final IndexingEngineSingleton INSTANCE;
 
     private ArrayList<Table> tables;
-
-	private Gson gson = new Gson();
-	private String filePath;
-	private FileManager fm;
+    private FileManager fm;
+    private HashMap<Integer, Integer> index;
 
     private boolean indexed;
     private boolean indexing;
@@ -32,125 +30,121 @@ public class IndexingEngineSingleton {
         INSTANCE = new IndexingEngineSingleton();
     }
 
-    private IndexingEngineSingleton()  {
+    private IndexingEngineSingleton() {
         tables = new ArrayList<>();
         indexed = false;
         indexing = false;
-        try{
-			fm = new FileManager();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
+        try {
+            fm = new FileManager();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
-	}
+
+    }
 
     public static IndexingEngineSingleton getInstance() {
         return INSTANCE;
     }
 
-	/**
-	 * Indexes the file and keeps line offsets for future queries
-	 * @param filePath path to .csv file;
-	 * @throws {@link IOException}
-	 */
-	public void startIndexing(String filePath, String tableName) throws IOException {
-		// Files related vars
-		String fileName = "src/main/resources/csv/test.csv";
-		FileInputStream fis = new FileInputStream(fileName);
-		InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
-		CSVReader reader = new CSVReader(isr);
+    /**
+     * Indexes the file and keeps line offsets for future queries
+     *
+     * @param filePath path to .csv file;
+     * @throws {@link IOException}
+     */
+    public void startIndexing(String filePath, String tableName) throws IOException {
+        // Files related vars
+        String fileName = "src/main/resources/csv/test.csv";
+        FileInputStream fis = new FileInputStream(fileName);
+        InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+        CSVReader reader = new CSVReader(isr);
 
-		// Reading CSV vars
-		String[] lineArray;
-		String line;
-		Object[] castedLine;
-		int i, headerLength;
+        // Reading CSV vars
+        String[] lineArray;
+        String line;
+        Object[] castedLine;
+        int i, headerLength;
 
-		Table t;
-		if((t = getTableByName(tableName)) == null) return;
-
-		// Saving vars
-		String savePath = "src/main/resources/csv/saved.bin";
-		int[] linePositions;
-		byte[] dataBytes;
-		int lineCounter = 0;
-		RandomAccessFile saveFile = new RandomAccessFile(savePath, "rw");
+        Table t;
+        if ((t = getTableByName(tableName)) == null) return;
 
 
-		try {
-			lineArray = reader.readNext();
-			headerLength = lineArray.length;
-			if(lineArray.length != getTableByName(tableName).getColumns().size()) {
-				System.out.println("Error, the file provided does not correspond to the table;");
-				return;
-			}
+        try {
+            lineArray = reader.readNext();
+            headerLength = lineArray.length;
+            if (lineArray.length != getTableByName(tableName).getColumns().size()) {
+                System.out.println("Error, the file provided does not correspond to the table;");
+                return;
+            }
 
-			// Setting up columns No
-			for(i = 0; i < headerLength; i++) {
-				t.getColumnByName(lineArray[i]).setColumnNo(i);
-			}
-			t.mapColumnsByNo();
+            // Setting up columns No
+            for (i = 0; i < headerLength; i++) {
+                t.getColumnByName(lineArray[i]).setColumnNo(i);
+            }
+            t.mapColumnsByNo();
+            t.sortColumnsByNo();
+            for (Column c : tables.get(0).getColumns()) {
+                System.out.println(c.getColumnNo());
+            }
+            while ((lineArray = reader.readNext()) != null) {
+                // Cast data
+                castedLine = new Object[headerLength];
+                for (i = 0; i < headerLength; i++) {
+                    castedLine[i] = t.getColumnByNo(i).castAndUpdateMetaData(lineArray[i]);
+                }
+                // Write line on disk
+                fm.writeLine(castedLine);
 
-
-			while((lineArray = reader.readNext()) != null) {
-
-				// Cast data
-				castedLine = new Object[headerLength];
-				for(i = 0; i < headerLength; i++) {
-					castedLine[i] = t.getColumnByNo(i).castAndUpdateMetaData(lineArray[i]);
-				}
-
-				//DEBUG TODO : REMOVE
-				int n = (int) fm.writeLine(castedLine);
-				System.out.println("line no : " +n + " read : " + Arrays.toString(fm.readline(n)));
-
-
-			}
-
-
-		} catch (CsvValidationException e) {
-			e.printStackTrace();
-			System.out.println("bizarre bizarre");
-		} catch (Exception e) {
-			// ->>> t.mapColumnByNo; handle exception better
-			System.out.println("herre");
-			e.printStackTrace();
-		}
+            }
+        } catch (CsvValidationException e) {
+            e.printStackTrace();
+            System.out.println("bizarre bizarre");
+        } catch (Exception e) {
+            // ->>> t.mapColumnByNo; handle exception better
+            System.out.println("herre");
+            e.printStackTrace();
+        }
 
     }
 
-	public ArrayList<Table> getTables() {
-		return tables;
-	}
+    // deubg
+    public ArrayList<Object[]> getallLines() {
+        return fm.getAllLines();
+    }
 
-	public Table getTableByName(String name)  {
-	    for(Table t: tables) {
-	        if(t.getName().equals(name)){
-	            return t;
+    public ArrayList<Table> getTables() {
+        return tables;
+    }
+
+    public Table getTableByName(String name) {
+        for (Table t : tables) {
+            if (t.getName().equals(name)) {
+                return t;
             }
         }
-	    return null;
+        return null;
     }
 
     public void addTable(Table t) {
-		this.tables.add(t);
-	}
+        this.tables.add(t);
+    }
 
-	public boolean isIndexed() {
-		return indexed;
-	}
+    public boolean isIndexed() {
+        return indexed;
+    }
 
-	public boolean isAvailable() {
-		return !indexing;
-	}
+    public boolean isAvailable() {
+        return !indexing;
+    }
 
-	public boolean canIndex() {
+    public boolean canIndex() {
         return true;
     }
 
-	public boolean canQuery() {
-		return indexed && !indexing && !error;
-	}
+    public boolean canQuery() {
+        return indexed && !indexing && !error;
+    }
 
 }
 

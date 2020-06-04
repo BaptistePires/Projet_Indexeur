@@ -118,37 +118,38 @@ public class IndexerEndpoint {
 	@Path("/uploadData")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response uploadData(MultipartFormDataInput input) throws InvalidFileException {
-//        String location = "", fileName = "";
-//        Map <String, List <InputPart>> uploadForm = input.getFormDataMap();
-//        List <InputPart> inputParts = uploadForm.get("file");
-//
-//        for (InputPart inputPart: inputParts) {
-//            try {
-//                MultivaluedMap<String,< String> header = inputPart.getHeaders();
-//                fileName = IndexerUtil.getFileName(header);
-//
-//	            if (!fileName.endsWith(".csv")) {
-//		            throw new InvalidFileException(fileName);
-//	            } else {
-//		            // File to InputStream
-//		            InputStream inputStream = inputPart.getBody(InputStream.class, null);
-//		            byte[] bytes = IOUtils.toByteArray(inputStream);
-//
-//		            // to path
-//		            location = Paths.get(".", "src", "main", "resources", "csv", fileName).toString();
-//                    uploadedFilePath = location;
-//
-//		            // saving
-//		            IndexerUtil.saveFile(bytes, location);
-//	            }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        log.info("Uploaded file to " + location);
-//        return Response.status(200).entity("Uploaded file to : " + location).build();
-		return Response.status(200).entity("Uploaded file to : ").build();
+        String location = "", fileName = "";
+        Map <String, List <InputPart>> uploadForm = input.getFormDataMap();
+        List <InputPart> inputParts = uploadForm.get("file");
+
+        for (InputPart inputPart: inputParts) {
+            try {
+                MultivaluedMap<String, String> header = inputPart.getHeaders();
+                fileName = IndexerUtil.getFileName(header);
+
+	            if (!fileName.endsWith(".csv")) {
+		            throw new InvalidFileException(fileName);
+	            } else {
+		            // File to InputStream
+		            InputStream inputStream = inputPart.getBody(InputStream.class, null);
+		            byte[] bytes = IOUtils.toByteArray(inputStream);
+
+		            // to path
+		            location = Paths.get(".", "src", "main", "resources", "csv", fileName).toString();
+                    uploadedFilePath = location;
+
+		            // saving
+		            IndexerUtil.saveFile(bytes, location);
+	            }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        log.info("Uploaded file to " + location);
+        return Response.status(200).entity("Uploaded file to : " + location).build();
 	}
+
+
 
 	@POST
 	@Path("/startIndexing")
@@ -224,6 +225,17 @@ public class IndexerEndpoint {
 		return Response.status(200)
 				.type(MediaType.APPLICATION_JSON_TYPE)
 				.entity(queryHandler.getResultAsLineNumbers(q))
+				.build();
+	}
+
+
+	// Debug
+	@GET
+	@Path("/allLines")
+	public Response getAllLines() {
+		return Response.status(200)
+				.type(MediaType.APPLICATION_JSON_TYPE)
+				.entity(indexingEngine.getallLines())
 				.build();
 	}
 

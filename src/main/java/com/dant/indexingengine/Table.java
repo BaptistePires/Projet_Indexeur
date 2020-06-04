@@ -12,7 +12,7 @@ public class Table implements Serializable {
      * we don't want any duplicated columns.
      */
     @Expose
-    private Set<Column> columns;
+    private ArrayList<Column> columns;
 
     /**
      * columnMappedByName : Map indexing columns by their names, can be useful when we load a .csv
@@ -38,7 +38,7 @@ public class Table implements Serializable {
     }
 
     public Table(String name) {
-        columns = new HashSet<>();
+        columns = new ArrayList<>();
         columnsMappedByName = new HashMap<>();
         columnsMappedByNo = new HashMap<>();
         indexes = new HashSet<>();
@@ -78,7 +78,7 @@ public class Table implements Serializable {
         return columnsMappedByName.get(name);
     }
 
-    public Set<Column> getColumns() {
+    public ArrayList<Column> getColumns() {
         return columns;
     }
 
@@ -91,7 +91,7 @@ public class Table implements Serializable {
     }
 
     public Column getColumnByNo(int no) {
-        return columnsMappedByNo.get(no);
+        return columns.get(no);
     }
 
     public void setName(String name) {
@@ -115,5 +115,10 @@ public class Table implements Serializable {
             }
             columnsMappedByNo.put(c.getColumnNo(), c);
         }
+    }
+
+    public void sortColumnsByNo() {
+        columns.sort(Comparator.comparing(Column::getColumnNo));
+
     }
 }

@@ -43,4 +43,20 @@ public class FileManager {
     public int countLine() { return lines.size(); }
 
     public long size() throws IOException { return randomAccessFile.length(); }
+
+    // DEBUG
+    public ArrayList<Object[]> getAllLines() {
+        ArrayList<Object[]> linesList = new ArrayList<>();
+        System.out.println(lines.size());
+        try{
+            for(int i = 0; i < (int) size() - 2; i++) {
+                linesList.add(readline(i));
+            }
+            return linesList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return linesList;
+        }
+
+    }
 }
