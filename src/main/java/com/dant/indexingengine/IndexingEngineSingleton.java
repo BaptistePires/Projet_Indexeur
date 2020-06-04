@@ -1,6 +1,7 @@
 package com.dant.indexingengine;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import lombok.Data;
@@ -77,6 +78,7 @@ public class IndexingEngineSingleton {
                 System.out.println("Error, the file provided does not correspond to the table;");
                 return;
             }
+
 
             // Setting up columns No
             for (i = 0; i < headerLength; i++) {

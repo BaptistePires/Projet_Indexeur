@@ -6,6 +6,7 @@ import com.google.gson.annotations.Expose;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public abstract class Column implements Serializable {
@@ -16,11 +17,16 @@ public abstract class Column implements Serializable {
     private String name;
     @Expose
     private int columnNo;
+    @Expose
+    private boolean isIndexed;
 
+    private HashMap<Object, ArrayList<Integer>> index;
 
     public Column(String name) throws UnsupportedTypeException {
         this.name = name;
         columnNo = UNDEFINED_NO;
+        isIndexed = false;
+        index = null;
     }
 
     public void setColumnNo(int columnNo) {
@@ -36,6 +42,12 @@ public abstract class Column implements Serializable {
     }
 
     public abstract Object castAndUpdateMetaData(String o);
+
+    public final void setIndexed(boolean status) {
+        isIndexed = status;
+        if(!isIndexed) return;
+        index = new HashMap<>();
+    }
 
 
     @Override
