@@ -19,11 +19,10 @@ public class FileManager {
 
     public long writeLine(Object[] line) throws IOException {
         byte[] data = SerializationUtils.serialize(line);
-        long[] pos = new long[2];
-        pos[0] = getPosEndFile();
-        pos[1] = data.length;
-        lines.add(pos);
-        randomAccessFile.seek(getPosEndFile());
+        long startPos = getPosEndFile();
+        if(startPos > 0) ++startPos;
+        lines.add(new long[]{startPos, data.length});
+        randomAccessFile.seek(startPos);
         randomAccessFile.write(data);
         return lines.size() - 1;
     }
@@ -40,4 +39,8 @@ public class FileManager {
         if(lines.size() == 0) return 0;
         return lines.get(lines.size() - 1)[0] + lines.get(lines.size() - 1)[1];
     }
+
+    public int countLine() { return lines.size(); }
+
+    public long size() throws IOException { return randomAccessFile.length(); }
 }

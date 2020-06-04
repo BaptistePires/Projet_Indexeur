@@ -19,10 +19,10 @@ public class IndexingEngineSingleton {
     private static final IndexingEngineSingleton INSTANCE;
 
     private ArrayList<Table> tables;
-	private ArrayList<int[]> data;
 
 	private Gson gson = new Gson();
 	private String filePath;
+	private FileManager fm;
 
     private boolean indexed;
     private boolean indexing;
@@ -32,12 +32,17 @@ public class IndexingEngineSingleton {
         INSTANCE = new IndexingEngineSingleton();
     }
 
-    private IndexingEngineSingleton() {
+    private IndexingEngineSingleton()  {
         tables = new ArrayList<>();
         indexed = false;
         indexing = false;
-        data = new ArrayList<>();
-    }
+        try{
+			fm = new FileManager();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+	}
 
     public static IndexingEngineSingleton getInstance() {
         return INSTANCE;
@@ -54,8 +59,6 @@ public class IndexingEngineSingleton {
 		FileInputStream fis = new FileInputStream(fileName);
 		InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
 		CSVReader reader = new CSVReader(isr);
-		ByteArrayOutputStream  bos = new ByteArrayOutputStream();
-		ObjectOutputStream objectOutputStream = new ObjectOutputStream(bos);
 
 		// Reading CSV vars
 		String[] lineArray;
@@ -97,38 +100,21 @@ public class IndexingEngineSingleton {
 					castedLine[i] = t.getColumnByNo(i).castAndUpdateMetaData(lineArray[i]);
 				}
 
-				// Serialize data
-				dataBytes = SerializationUtils.serialize(castedLine);
-				linePositions = new int[2];
-				if(lineCounter != 0) {
-					linePositions[0] = data.get(lineCounter - 1)[0] + data.get(lineCounter -1 )[1];
-				}
-				linePositions[1] = dataBytes.length;
-				data.add(linePositions);
-				saveFile.write(dataBytes);
-				lineCounter++;
+				//DEBUG TODO : REMOVE
+				int n = (int) fm.writeLine(castedLine);
+				System.out.println("line no : " +n + " read : " + Arrays.toString(fm.readline(n)));
+
+
 			}
 
-			// Debug, will be removed
-			byte[] read;
-			for(i = 0; i < lineCounter; i++) {
-				saveFile.seek(data.get(i)[0]);
-				read = new byte[data.get(i)[1]];
-				saveFile.read(read, 0, data.get(i)[1]);
-				Object[] o = SerializationUtils.deserialize(read);
-//				System.out.println(Arrays.toString(o));
-			}
 
 		} catch (CsvValidationException e) {
 			e.printStackTrace();
+			System.out.println("bizarre bizarre");
 		} catch (Exception e) {
 			// ->>> t.mapColumnByNo; handle exception better
+			System.out.println("herre");
 			e.printStackTrace();
-		}
-		finally {
-			objectOutputStream.close();
-			saveFile.close();
-
 		}
 
     }
