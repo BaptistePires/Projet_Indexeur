@@ -49,7 +49,7 @@ public class FileManager {
         ArrayList<Object[]> linesList = new ArrayList<>();
         System.out.println(lines.size());
         try{
-            for(int i = 0; i < (int) size() - 2; i++) {
+            for(int i = 0; i < (int) lines.size(); i++) {
                 linesList.add(readline(i));
             }
             return linesList;
