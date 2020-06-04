@@ -90,10 +90,9 @@ public class IndexerEndpoint {
 		JsonObject indexInfo = new JsonParser().parse(body).getAsJsonObject();
 		Table t = indexingEngine.getTableByName(indexInfo.get("tableName").getAsString());
 		JsonArray indexedColumn = indexInfo.get("indexes").getAsJsonArray();
-		System.out.println(indexedColumn);
-		for(int i = 0; i < indexedColumn.size(); i++) {
-			t.addIndexByName(indexedColumn.get(i).getAsString());
-		}
+		Column[] columns = new Column[indexedColumn.size()];
+		for(int i = 0; i < indexedColumn.size(); i++) columns[i] = t.getColumnByName(indexedColumn.get(i).getAsString());
+		t.addIndexByName(columns);
 		// Before inserting indexes, we must check data integrity
 //		if (indexesToAdd.size() > IndexingEngineSingleton.getInstance().getTable().getColumns().size())
 //			throw new InvalidIndexException("You provided more indexes" +

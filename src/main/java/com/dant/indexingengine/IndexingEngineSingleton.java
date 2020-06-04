@@ -84,19 +84,28 @@ public class IndexingEngineSingleton {
             for (i = 0; i < headerLength; i++) {
                 t.getColumnByName(lineArray[i]).setColumnNo(i);
             }
-            t.mapColumnsByNo();
+            
             t.sortColumnsByNo();
-            for (Column c : tables.get(0).getColumns()) {
-                System.out.println(c.getColumnNo());
-            }
+            
             while ((lineArray = reader.readNext()) != null) {
                 // Cast data
                 castedLine = new Object[headerLength];
                 for (i = 0; i < headerLength; i++) {
-                    castedLine[i] = t.getColumnByNo(i).castAndUpdateMetaData(lineArray[i]);
+                    castedLine[i] = t.getColumns().get(i).castAndUpdateMetaData(lineArray[i]);
                 }
                 // Write line on disk
-                fm.writeLine(castedLine);
+                long noLine = fm.writeLine(castedLine);
+
+                // Update indexes
+                for(Map.Entry<Column[], SimpleIndex> entry: t.getIndexes().entrySet()){
+                    ArrayList<String> lst = new ArrayList<>();
+                    for(Column c : entry.getKey()){
+                        lst.add(lineArray[c.getColumnNo()]);
+                    }
+                    String idx = String.join(",", lst);
+                    System.out.println(idx);
+                    entry.getValue().index(idx,(int) noLine);
+                }
 
             }
         } catch (CsvValidationException e) {

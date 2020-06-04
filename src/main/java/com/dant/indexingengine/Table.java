@@ -28,7 +28,7 @@ public class Table implements Serializable {
      * that are used to index data.
      */
     @Expose
-    private Set<Column> indexes;
+    private HashMap<Column[], SimpleIndex> indexes;
 
     @Expose
     private String name;
@@ -41,7 +41,7 @@ public class Table implements Serializable {
         columns = new ArrayList<>();
         columnsMappedByName = new HashMap<>();
         columnsMappedByNo = new HashMap<>();
-        indexes = new HashSet<>();
+        indexes = new HashMap<>();
         this.name = name;
     }
 
@@ -50,8 +50,8 @@ public class Table implements Serializable {
         columnsMappedByName.put(c.getName(), c);
     }
 
-    public void addIndexByName(String id) {
-        indexes.add(getColumnByName(id));
+    public void addIndexByName(Column[] columns) {
+        indexes.put(columns, new SimpleIndex());
     }
 
     public void removeColumnByName(String name) {
@@ -66,14 +66,6 @@ public class Table implements Serializable {
         indexes.remove(col);
     }
 
-    public void removeIndex(String colName) {
-        indexes.remove(getColumnByName(colName));
-    }
-
-    public void removeIndexedColByReference(Column col) {
-        removeIndex(col.getName());
-    }
-
     public Column getColumnByName(String name) {
         return columnsMappedByName.get(name);
     }
@@ -84,10 +76,6 @@ public class Table implements Serializable {
 
     public List<String> getColumnsName() {
         return new ArrayList<>(columnsMappedByName.keySet());
-    }
-
-    public Set<Column> getIndexedColumns() {
-        return indexes;
     }
 
     public Column getColumnByNo(int no) {
@@ -119,6 +107,9 @@ public class Table implements Serializable {
 
     public void sortColumnsByNo() {
         columns.sort(Comparator.comparing(Column::getColumnNo));
+    }
 
+    public HashMap<Column[], SimpleIndex> getIndexes() {
+        return indexes;
     }
 }
