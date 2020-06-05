@@ -83,3 +83,5 @@ src/main/resources/csv/*.csv
 # Except
 !src/main/resources/csv/test.csv
 /src/main/resources/csv/cp.py
+/src/main/resources/csv/linesPositions.bin
+/src/main/resources/csv/linesPos.bin

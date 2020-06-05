@@ -56,6 +56,7 @@ public class IndexingEngineSingleton {
      */
     public void startIndexing(String filePath, String tableName) throws IOException {
         // Files related vars
+//        String fileName = "src/main/resources/csv/yellow_tripdata_2019-01.csv";
         String fileName = "src/main/resources/csv/test.csv";
         FileInputStream fis = new FileInputStream(fileName);
         InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
@@ -103,11 +104,11 @@ public class IndexingEngineSingleton {
                         lst.add(lineArray[c.getColumnNo()]);
                     }
                     String idx = String.join(",", lst);
-                    System.out.println(idx);
                     entry.getValue().index(idx,(int) noLine);
                 }
 
             }
+
         } catch (CsvValidationException e) {
             e.printStackTrace();
             System.out.println("bizarre bizarre");
@@ -117,6 +118,21 @@ public class IndexingEngineSingleton {
             e.printStackTrace();
         }
 
+    }
+
+
+    public Object[] handleQuery(Query q) {
+        Object[] lines = new Object[1];
+        Table t = getTableByName(q.table);
+
+        // Build tmp indexes
+        String[] indexKeyArray = new String[q.conditions.size()];
+
+        // Iterate through conditions
+        for(Map.Entry<String, Map<String, Object>> entry: q.conditions.entrySet()) {
+
+        }
+        return lines;
     }
 
     // deubg

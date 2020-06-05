@@ -14,7 +14,6 @@ public class SimpleIndex {
 
     public void index(Object o, int noLine) {
         indexedData.computeIfAbsent(o, k -> new ArrayList<>());
-        System.out.println(indexedData.get(o).size());
         indexedData.get(o).add(noLine);
     }
 
