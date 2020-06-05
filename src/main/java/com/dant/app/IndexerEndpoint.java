@@ -6,10 +6,7 @@ import com.dant.exception.InvalidIndexException;
 import com.dant.exception.NoDataException;
 import com.dant.exception.UnsupportedTypeException;
 import com.dant.utils.IndexerUtil;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.GZIP;
@@ -42,12 +39,12 @@ public class IndexerEndpoint {
 	@POST
 	@Path("/createTable")
 	public Response createTable(String body) throws UnsupportedTypeException {
-		JsonObject tableData = new JsonParser().parse(body).getAsJsonObject();
+		JsonObject tableLayout = new JsonParser().parse(body).getAsJsonObject();
 
 		// Setting up name
 		String tableName;
 		try{
-			tableName = tableData.get("name").getAsString();
+			tableName = tableLayout.get("name").getAsString();
 		}catch (Exception e) {
 			tableName = "default";
 		}
@@ -56,25 +53,26 @@ public class IndexerEndpoint {
 
 		// Setting up columns
 		Column c;
-		for (Map.Entry<String, JsonElement> col : tableData.get("columns").getAsJsonObject().entrySet()) {
-			String type = col.getValue().getAsString().toLowerCase();
+		for (JsonElement columnElement : tableLayout.getAsJsonArray("columns")) {
+			JsonObject column = columnElement.getAsJsonObject();
+			String type = column.get("type").getAsString().toLowerCase();
 			switch (type) {
 				case "integer":
-					c = new IntegerColumn(col.getKey());
+					c = new IntegerColumn(column.get("name").getAsString());
 					break;
 
 				case "string":
-					c = new StringColumn(col.getKey());
+					c = new StringColumn(column.get("name").getAsString());
 					break;
 
 				default:
-					c = new StringColumn(col.getKey());
+					c = new StringColumn(column.get("name").getAsString());
 			}
 			table.addColumn(c);
 		}
 		indexingEngine.addTable(table);
 
-		return Response.status(201).entity("Table created").build();
+		return Response.status(201).entity("Table \"" + tableName + "\" has been created").build();
 	}
 
 
