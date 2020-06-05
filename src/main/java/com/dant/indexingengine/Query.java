@@ -1,4 +1,4 @@
-package com.dant.entity;
+package com.dant.indexingengine;
 
 import com.google.gson.annotations.Expose;
 
@@ -9,15 +9,26 @@ public class Query {
 
     @Expose
     String type;
+
     @Expose
     List<String> cols;
+
     @Expose
     Map<String, Map<String, Object>> conditions;
 
-    public Query(String type, List<String> cols, Map<String, Map<String, Object>> conditions) {
+    @Expose
+    int limit;
+
+    @Expose
+    String table;
+
+
+    public Query(String type, List<String> cols, Map<String, Map<String, Object>> conditions, int limit, String table) {
         this.type = type;
         this.cols = cols;
         this.conditions = conditions;
+        this.limit = limit;
+        this.table = table;
     }
 
     public String getType() {
