@@ -7,12 +7,13 @@ import com.dant.exception.NoDataException;
 import com.dant.exception.UnsupportedTypeException;
 import com.dant.utils.IndexerUtil;
 import com.google.gson.*;
-import lombok.extern.slf4j.Slf4j;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -20,15 +21,12 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Path("/indexer")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Slf4j
 public class IndexerEndpoint {
 
 	private IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
@@ -142,7 +140,7 @@ public class IndexerEndpoint {
                 e.printStackTrace();
             }
         }
-        log.info("Uploaded file to " + location);
+        System.out.println("Uploaded file to " + location);
         return Response.status(200).entity("Uploaded file to : " + location).build();
 	}
 
@@ -174,6 +172,7 @@ public class IndexerEndpoint {
 		indexingEngine.startIndexing("", "TableName");
 		return Response.status(200).entity("Indexing started").build();
 	}
+
 
 
 	/**
@@ -216,6 +215,7 @@ public class IndexerEndpoint {
 	 * @throws NoDataException
 	 */
 	@POST
+
 	@Path("/lines")
 	public Response getLines(Query q) throws NoDataException {
 		log.info("Received " + q.toString());
