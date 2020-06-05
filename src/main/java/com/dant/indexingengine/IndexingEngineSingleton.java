@@ -1,14 +1,10 @@
 package com.dant.indexingengine;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
-import lombok.Data;
-import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -172,21 +168,7 @@ public class IndexingEngineSingleton {
         return indexed && !indexing && !error;
     }
 
-	public ArrayList<Integer> getOffsets() {
-		return offsets;
-	}
 
-	public RandomAccessFile getRandomAccessFile() {
-		return randomAccessFile;
-	}
-
-	public Gson getGson() {
-		return gson;
-	}
-
-	public Map<Map<String, Object>, List<Integer>> getIndexedData() {
-		return indexedData;
-	}
 }
 
 

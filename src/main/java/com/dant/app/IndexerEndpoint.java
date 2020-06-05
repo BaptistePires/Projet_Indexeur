@@ -206,26 +206,7 @@ public class IndexerEndpoint {
 				.entity(queryHandler.handleQuery(q))
 				.build();
 	}
-
-	/**
-	 * Get lines from a query
-	 *
-	 * @param q Query object
-	 * @return Line numbers in CSV instead of actual data
-	 * @throws NoDataException
-	 */
-	@POST
-
-	@Path("/lines")
-	public Response getLines(Query q) throws NoDataException {
-		log.info("Received " + q.toString());
-		return Response.status(200)
-				.type(MediaType.APPLICATION_JSON_TYPE)
-				.entity(queryHandler.getResultAsLineNumbers(q))
-				.build();
-	}
-
-
+	
 	// Debug
 	@GET
 	@Path("/allLines")
