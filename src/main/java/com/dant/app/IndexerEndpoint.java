@@ -59,6 +59,10 @@ public class IndexerEndpoint {
 					c = new IntegerColumn(column.get("name").getAsString());
 					break;
 
+				case "double":
+					c = new DoubleColumn(column.get("name").getAsString());
+					break;
+
 				case "string":
 					c = new StringColumn(column.get("name").getAsString());
 					break;

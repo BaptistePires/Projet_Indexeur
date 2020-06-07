@@ -87,3 +87,4 @@ src/main/resources/csv/*.csv
 /src/main/resources/csv/linesPos.bin
 !src/main/resources/csv/unit_tests.csv
 /src/main/resources/csv/saved.bin
+/src/main/resources/csv/DataOutputFile.bin

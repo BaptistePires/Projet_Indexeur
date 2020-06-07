@@ -11,7 +11,6 @@ import java.util.*;
 // TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
 // Will work with only one index currently
 public class IndexingEngineSingleton {
-
     private static final IndexingEngineSingleton INSTANCE;
 
     private ArrayList<Table> tables;
@@ -21,6 +20,8 @@ public class IndexingEngineSingleton {
     private boolean indexed;
     private boolean indexing;
     private boolean error;
+
+    private int lineNum;
 
     static {
         INSTANCE = new IndexingEngineSingleton();
@@ -57,6 +58,9 @@ public class IndexingEngineSingleton {
         InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
         CSVReader reader = new CSVReader(isr);
 
+        String outputFilePath = "src/main/resources/csv/DataOutputFile.bin";
+        DataOutputStream out = new DataOutputStream((new BufferedOutputStream(new FileOutputStream(outputFilePath))));
+
         // Reading CSV vars
         String[] lineArray;
         String line;
@@ -75,7 +79,6 @@ public class IndexingEngineSingleton {
                 return;
             }
 
-
             // Setting up columns No
             for (i = 0; i < headerLength; i++) {
                 t.getColumnByName(lineArray[i]).setColumnNo(i);
@@ -88,6 +91,16 @@ public class IndexingEngineSingleton {
                 castedLine = new Object[headerLength];
                 for (i = 0; i < headerLength; i++) {
                     castedLine[i] = t.getColumns().get(i).castAndUpdateMetaData(lineArray[i]);
+                    // Write data to file with DataOutputStream
+                    if (castedLine[i] instanceof Integer) {
+                        out.writeInt(!lineArray[i].isEmpty() ? (Integer) castedLine[i] : 0);
+                    } else if (castedLine[i] instanceof Double) {
+                        out.writeDouble(!lineArray[i].isEmpty() ? (Double) castedLine[i] : 0);
+                    } else if (castedLine[i] instanceof String) {
+                        out.writeUTF(!lineArray[i].isEmpty() ? (String) castedLine[i] : "");
+                    } else {
+                        System.out.println("Type not known");
+                    }
                 }
                 // Write line on disk
                 long noLine = fm.writeLine(castedLine);
@@ -101,9 +114,10 @@ public class IndexingEngineSingleton {
                     String idx = String.join(",", lst);
                     entry.getValue().index(idx,(int) noLine);
                 }
-
+                lineNum++;
             }
-
+            out.flush();
+            System.out.println("\n" + lineNum + " rows written to " + outputFilePath);
         } catch (CsvValidationException e) {
             e.printStackTrace();
             System.out.println("bizarre bizarre");
