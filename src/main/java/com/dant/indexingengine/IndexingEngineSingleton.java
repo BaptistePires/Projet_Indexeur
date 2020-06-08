@@ -6,6 +6,7 @@ import com.opencsv.exceptions.CsvValidationException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.*;
 
 // TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
@@ -16,6 +17,7 @@ public class IndexingEngineSingleton {
     private ArrayList<Table> tables;
     private FileManager fm;
     private HashMap<Integer, Integer> index;
+    private Set<String> pathsAllocated;
 
     private boolean indexed;
     private boolean indexing;
@@ -36,7 +38,7 @@ public class IndexingEngineSingleton {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
+        pathsAllocated = new HashSet<>();
 
     }
 
@@ -53,7 +55,7 @@ public class IndexingEngineSingleton {
     public void startIndexing(String filePath, String tableName) throws IOException {
         // Files related vars
 //        String fileName = "src/main/resources/csv/yellow_tripdata_2019-01.csv";
-        String fileName = "src/main/resources/csv/test.csv";
+        String fileName = "src/main/resources/csv/yellow_tripdata_2019-01.csv";
         FileInputStream fis = new FileInputStream(fileName);
         InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
         CSVReader reader = new CSVReader(isr);
@@ -85,7 +87,7 @@ public class IndexingEngineSingleton {
             }
             
             t.sortColumnsByNo();
-            
+            long noLine = 0;
             while ((lineArray = reader.readNext()) != null) {
                 // Cast data
                 castedLine = new Object[headerLength];
@@ -103,9 +105,10 @@ public class IndexingEngineSingleton {
                     }
                 }
                 // Write line on disk
-                long noLine = fm.writeLine(castedLine);
+//                noLine = fm.writeLine(castedLine);
 
-                // Update indexes
+//                 Update indexes
+
                 for(Map.Entry<Column[], SimpleIndex> entry: t.getIndexes().entrySet()){
                     ArrayList<String> lst = new ArrayList<>();
                     for(Column c : entry.getKey()){
@@ -114,10 +117,11 @@ public class IndexingEngineSingleton {
                     String idx = String.join(",", lst);
                     entry.getValue().index(idx,(int) noLine);
                 }
-                lineNum++;
+//                lineNum++;
+//                System.out.println("l"+lineNum);
             }
             out.flush();
-            System.out.println("\n" + lineNum + " rows written to " + outputFilePath);
+            System.out.println("\n" + noLine + " rows written to " + outputFilePath);
         } catch (CsvValidationException e) {
             e.printStackTrace();
             System.out.println("bizarre bizarre");
@@ -180,6 +184,14 @@ public class IndexingEngineSingleton {
 
     public boolean canQuery() {
         return indexed && !indexing && !error;
+    }
+
+    public String getNewFilePath(){
+        // TODO : Find a way to clear dirs on server shutdown
+        String tmpName = Paths.get("src", "main", "resources", "tmp", UUID.randomUUID().toString()).toString();
+        while(pathsAllocated.contains(tmpName)) tmpName = Paths.get("src", "main", "resources", "tmp", UUID.randomUUID().toString()).toString();
+        pathsAllocated.add(tmpName);
+        return tmpName;
     }
 
 
