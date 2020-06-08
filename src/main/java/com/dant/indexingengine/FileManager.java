@@ -19,23 +19,33 @@ public class FileManager {
 
     }
 
-    public long writeLine(Object[] line) throws IOException {
+    public long writeLine(Object[] line, ArrayList<Column> columns) throws IOException {
+
         byte[] data = SerializationUtils.serialize(line);
         long startPos = dataSavedToDisk.length();
         if(startPos > 0) ++startPos;
-        savePositionsToFile(new long[]{startPos, data.length});
+        long lineSize = 0;
         dataSavedToDisk.seek(startPos);
-        dataSavedToDisk.write(data);
+        for(int i = 0; i < line.length; i++) {
+            lineSize+= columns.get(i).writeToFile(dataSavedToDisk, line[i]);
+        }
+        savePositionsToFile(new long[]{startPos, lineSize});
+        dataSavedToDisk.seek(startPos);
         countLines++;
         return countLines - 1;
     }
 
-    public Object[] readline(int no) throws IOException {
+    public Object[] readline(int no, ArrayList<Column> cols) throws IOException {
         long[] linePos = readPositionOfLine(no);
         dataSavedToDisk.seek(linePos[0]);
-        byte[] serializedLine = new byte[(int) linePos[1]];
-        dataSavedToDisk.read(serializedLine, 0, (int) linePos[1]);
-        return SerializationUtils.deserialize(serializedLine);
+        Object[] line = new Object[cols.size()];
+        for(int i = 0; i < cols.size(); i++) {
+            line[i] = cols.get(i).readFromFile(dataSavedToDisk);
+        }
+        return line;
+//        byte[] serializedLine = new byte[(int) linePos[1]];
+//        dataSavedToDisk.read(serializedLine, 0, (int) linePos[1]);
+//        return SerializationUtils.deserialize(serializedLine);
     }
 
     private void savePositionsToFile(long[] positions) throws IOException {
@@ -71,7 +81,7 @@ public class FileManager {
         ArrayList<Object[]> linesList = new ArrayList<>();
         try{
             for(int i = 0; i < countLines; i++) {
-                linesList.add(readline(i));
+//                linesList.add(readline(i));
             }
             return linesList;
         } catch (Exception e) {

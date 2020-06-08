@@ -2,6 +2,9 @@ package com.dant.indexingengine;
 
 import com.dant.exception.UnsupportedTypeException;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
 public class IntegerColumn extends Column {
 
     int max, min;
@@ -24,7 +27,14 @@ public class IntegerColumn extends Column {
         return x;
     }
 
+    @Override
+    public int writeToFile(RandomAccessFile file, Object o) throws IOException {
+        file.writeInt((int) o);
+        return INT_BYTE_SIZE;
+    }
 
-
-
+    @Override
+    public Object readFromFile(RandomAccessFile file) throws IOException {
+        return file.readInt();
+    }
 }

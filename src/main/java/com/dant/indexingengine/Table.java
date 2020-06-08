@@ -112,4 +112,12 @@ public class Table implements Serializable {
     public HashMap<Column[], SimpleIndex> getIndexes() {
         return indexes;
     }
+
+    public ArrayList<Column> getIndexedColumns() {
+        ArrayList<Column> tmp = new ArrayList<>();
+        for(Column c : columns) {
+            if(c.isIndexed()) tmp.add(c);
+        }
+        return tmp;
+    }
 }

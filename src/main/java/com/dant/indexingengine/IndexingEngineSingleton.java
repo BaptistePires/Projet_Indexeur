@@ -54,7 +54,7 @@ public class IndexingEngineSingleton {
      */
     public void startIndexing(String filePath, String tableName) throws IOException {
         // Files related vars
-//        String fileName = "src/main/resources/csv/yellow_tripdata_2019-01.csv";
+//        String fileName = "src/main/resources/csv/test.csv";
         String fileName = "src/main/resources/csv/yellow_tripdata_2019-01.csv";
         FileInputStream fis = new FileInputStream(fileName);
         InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
@@ -70,7 +70,9 @@ public class IndexingEngineSingleton {
         int i, headerLength;
 
         Table t;
+        //TODO : Exception table does not exist
         if ((t = getTableByName(tableName)) == null) return;
+        ArrayList<Column> indexedColumns = t.getIndexedColumns();
 
 
         try {
@@ -94,34 +96,41 @@ public class IndexingEngineSingleton {
                 for (i = 0; i < headerLength; i++) {
                     castedLine[i] = t.getColumns().get(i).castAndUpdateMetaData(lineArray[i]);
                     // Write data to file with DataOutputStream
-                    if (castedLine[i] instanceof Integer) {
-                        out.writeInt(!lineArray[i].isEmpty() ? (Integer) castedLine[i] : 0);
-                    } else if (castedLine[i] instanceof Double) {
-                        out.writeDouble(!lineArray[i].isEmpty() ? (Double) castedLine[i] : 0);
-                    } else if (castedLine[i] instanceof String) {
-                        out.writeUTF(!lineArray[i].isEmpty() ? (String) castedLine[i] : "");
-                    } else {
-                        System.out.println("Type not known");
-                    }
+//                    if (castedLine[i] instanceof Integer) {
+//                        out.writeInt(!lineArray[i].isEmpty() ? (Integer) castedLine[i] : 0);
+//                    } else if (castedLine[i] instanceof Double) {
+//                        out.writeDouble(!lineArray[i].isEmpty() ? (Double) castedLine[i] : 0);
+//                    } else if (castedLine[i] instanceof String) {
+//                        out.writeUTF(!lineArray[i].isEmpty() ? (String) castedLine[i] : "");
+//                    } else {
+//                        System.out.println("Type not known");
+//                    }
                 }
                 // Write line on disk
-//                noLine = fm.writeLine(castedLine);
-
+                noLine = fm.writeLine(castedLine, t.getColumns());
+//                System.out.println("here");
 //                 Update indexes
-
-                for(Map.Entry<Column[], SimpleIndex> entry: t.getIndexes().entrySet()){
-                    ArrayList<String> lst = new ArrayList<>();
-                    for(Column c : entry.getKey()){
-                        lst.add(lineArray[c.getColumnNo()]);
-                    }
-                    String idx = String.join(",", lst);
-                    entry.getValue().index(idx,(int) noLine);
+                for(Column c: indexedColumns) {
+//                    castedLine[c.getColumnNo()] = c.castAndUpdateMetaData(lineArray[c.getColumnNo()]);
+                    c.index(castedLine[c.getColumnNo()], (int) noLine);
                 }
+//                for(Map.Entry<Column[], SimpleIndex> entry: t.getIndexes().entrySet()){
+//                    ArrayList<String> lst = new ArrayList<>();
+//                    for(Column c : entry.getKey()){
+//                        lst.add(lineArray[c.getColumnNo()]);
+//                    }
+//                    String idx = String.join(",", lst);
+//                    entry.getValue().index(idx,(int) noLine);
+//                }
 //                lineNum++;
 //                System.out.println("l"+lineNum);
             }
-            out.flush();
+//            out.flush();
             System.out.println("\n" + noLine + " rows written to " + outputFilePath);
+            ArrayList<Integer> testt = t.getColumnByName("VendorID").getLinesForIndex(1, 100);
+            for(int j: testt) {
+                System.out.println("VendorID 1 : " +Arrays.toString(fm.readline(j, t.getColumns())));
+            }
         } catch (CsvValidationException e) {
             e.printStackTrace();
             System.out.println("bizarre bizarre");
