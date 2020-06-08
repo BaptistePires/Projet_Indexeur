@@ -144,6 +144,7 @@ public class IndexingEngineSingleton {
 
     public ArrayList<Object[]> handleQuery(Query q) throws IOException {
         ArrayList<Object[]> lines;
+        ArrayList<Column> selectedCols;
         Table t = getTableByName(q.table);
 
         ArrayList<Integer> resultLines = new ArrayList<>();
@@ -155,14 +156,14 @@ public class IndexingEngineSingleton {
                 resultLines = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
             }
         }
-		if (q.cols.get(0).equals("*"))
-			lines = fm.getLines(resultLines, t.getColumns());
-		else
-			lines = fm.getLines(resultLines, t.getColumnsByNames(q.cols));
-        return lines;
+
+		if (q.cols.get(0).equals("*")) selectedCols = t.getColumns();
+		else selectedCols = t.getColumnsByNames(q.cols);
+
+        return fm.getLines(resultLines, t.getColumns(), selectedCols);
     }
 
-    // deubg
+    // debug
     public ArrayList<Object[]> getallLines() {
         return fm.getAllLines(getTableByName("TableName").getColumns());
     }

@@ -37,17 +37,19 @@ public class FileManager {
         return countLines - 1;
     }
 
-    public Object[] readline(int no, ArrayList<Column> cols) throws IOException {
+
+    public Object[] readline(int no, ArrayList<Column> allCols, ArrayList<Column> selectedCols) throws IOException {
         long[] linePos = readPositionOfLine(no);
         dataSavedToDisk.seek(linePos[0]);
-        Object[] line = new Object[cols.size()];
-        for(int i = 0; i < cols.size(); i++) {
-            line[i] = cols.get(i).readFromFile(dataSavedToDisk);
+        Object[] line = new Object[allCols.size()];
+        Object[] returnedLine = new Object[selectedCols.size()];
+        for (int i = 0; i < allCols.size(); i++) {
+            line[i] = allCols.get(i).readFromFile(dataSavedToDisk);
         }
-        return line;
-//        byte[] serializedLine = new byte[(int) linePos[1]];
-//        dataSavedToDisk.read(serializedLine, 0, (int) linePos[1]);
-//        return SerializationUtils.deserialize(serializedLine);
+        for (int i = 0; i < selectedCols.size(); i++) {
+            returnedLine[i] = line[selectedCols.get(i).getColumnNo()];
+        }
+        return returnedLine;
     }
 
     private void savePositionsToFile(long[] positions) throws IOException {
@@ -71,11 +73,12 @@ public class FileManager {
 
     public long size() throws IOException { return dataSavedToDisk.length(); }
 
-    public ArrayList<Object[]> getLines(ArrayList<Integer> lineNos, ArrayList<Column> cols) {
+
+    public ArrayList<Object[]> getLines(ArrayList<Integer> lineNos, ArrayList<Column> allCols, ArrayList<Column> selectedCols) {
         ArrayList<Object[]> linesList = new ArrayList<>();
         try{
             for (int i : lineNos) {
-                linesList.add(readline(i, cols));
+                linesList.add(readline(i, allCols, selectedCols));
             }
             return linesList;
         } catch (Exception e) {
@@ -89,7 +92,7 @@ public class FileManager {
         ArrayList<Object[]> linesList = new ArrayList<>();
         try{
             for(int i = 0; i < countLines; i++) {
-                linesList.add(readline(i, cols));
+                linesList.add(readline(i, cols, cols));
             }
             return linesList;
         } catch (Exception e) {
