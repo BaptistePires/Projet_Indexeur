@@ -61,6 +61,8 @@ public class Query {
         sb.append("Query \n ------- ");
         sb.append("Type    : ").append(type).append("\n");
         sb.append("Columns : ").append(cols).append("\n");
+        sb.append("Limit    : ").append(limit).append("\n");
+        sb.append("Table    : ").append(table).append("\n");
         sb.append("Conditions : ").append("\n");
         for (Map.Entry<String, Map<String, Object>> e : conditions.entrySet()) {
             sb.append("\t").append(e.getKey()).append("\n");

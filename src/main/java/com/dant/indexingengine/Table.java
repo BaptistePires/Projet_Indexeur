@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Table implements Serializable {
 
@@ -70,12 +71,22 @@ public class Table implements Serializable {
         return columnsMappedByName.get(name);
     }
 
+    public ArrayList<Column> getColumnsByNames(List<String> names) {
+        return (ArrayList<Column>) names
+                .stream()
+                .map(o -> getColumnByName(o))
+                .collect(Collectors.toList());
+    }
+
     public ArrayList<Column> getColumns() {
         return columns;
     }
 
     public List<String> getColumnsName() {
-        return new ArrayList<>(columnsMappedByName.keySet());
+        return columns
+                .stream()
+                .map(Column::getName)
+                .collect(Collectors.toList());
     }
 
     public Column getColumnByNo(int no) {

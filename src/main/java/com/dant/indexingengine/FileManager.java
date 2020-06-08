@@ -2,7 +2,9 @@ package com.dant.indexingengine;
 
 import org.apache.commons.lang3.SerializationUtils;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
 public class FileManager {
@@ -69,19 +71,25 @@ public class FileManager {
 
     public long size() throws IOException { return dataSavedToDisk.length(); }
 
-
-
-
-
-
-
+    public ArrayList<Object[]> getLines(ArrayList<Integer> lineNos, ArrayList<Column> cols) {
+        ArrayList<Object[]> linesList = new ArrayList<>();
+        try{
+            for (int i : lineNos) {
+                linesList.add(readline(i, cols));
+            }
+            return linesList;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return linesList;
+        }
+    }
 
     // DEBUG
-    public ArrayList<Object[]> getAllLines() {
+    public ArrayList<Object[]> getAllLines(ArrayList<Column> cols) {
         ArrayList<Object[]> linesList = new ArrayList<>();
         try{
             for(int i = 0; i < countLines; i++) {
-//                linesList.add(readline(i));
+                linesList.add(readline(i, cols));
             }
             return linesList;
         } catch (Exception e) {
