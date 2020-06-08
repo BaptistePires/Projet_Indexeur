@@ -1,6 +1,5 @@
 package com.dant.indexingengine;
 
-import com.google.gson.Gson;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
@@ -49,13 +48,13 @@ public class IndexingEngineSingleton {
     /**
      * Indexes the file and keeps line offsets for future queries
      *
-     * @param filePath path to .csv file;
+     * @param fileName path to .csv file;
      * @throws {@link IOException}
      */
-    public void startIndexing(String filePath, String tableName) throws IOException {
+    public void startIndexing(String fileName, String tableName) throws IOException {
         // Files related vars
 //        String fileName = "src/main/resources/csv/test.csv";
-        String fileName = "src/main/resources/csv/yellow_tripdata_2019-01.csv";
+        //String fileName = "src/main/resources/csv/yellow_tripdata_2019-01.csv";
         FileInputStream fis = new FileInputStream(fileName);
         InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
         CSVReader reader = new CSVReader(isr);
@@ -127,10 +126,10 @@ public class IndexingEngineSingleton {
             }
 //            out.flush();
             System.out.println("\n" + noLine + " rows written to " + outputFilePath);
-            ArrayList<Integer> testt = t.getColumnByName("VendorID").getLinesForIndex(1, 100);
-            for(int j: testt) {
-                System.out.println("VendorID 1 : " +Arrays.toString(fm.readline(j, t.getColumns())));
-            }
+            //ArrayList<Integer> testt = t.getColumnByName("VendorID").getLinesForIndex(1, 100);
+            //for(int j: testt) {
+            //    System.out.println("VendorID 1 : " +Arrays.toString(fm.readline(j, t.getColumns())));
+            //}
         } catch (CsvValidationException e) {
             e.printStackTrace();
             System.out.println("bizarre bizarre");
@@ -143,23 +142,29 @@ public class IndexingEngineSingleton {
     }
 
 
-    public Object[] handleQuery(Query q) {
-        Object[] lines = new Object[1];
+    public ArrayList<Object[]> handleQuery(Query q) throws IOException {
+        ArrayList<Object[]> lines;
         Table t = getTableByName(q.table);
 
-        // Build tmp indexes
-        String[] indexKeyArray = new String[q.conditions.size()];
+        ArrayList<Integer> resultLines = new ArrayList<>();
 
         // Iterate through conditions
         for(Map.Entry<String, Map<String, Object>> entry: q.conditions.entrySet()) {
 
+            if (entry.getValue().get("operator").equals("=")) {
+                resultLines = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
+            }
         }
+		if (q.cols.get(0).equals("*"))
+			lines = fm.getLines(resultLines, t.getColumns());
+		else
+			lines = fm.getLines(resultLines, t.getColumnsByNames(q.cols));
         return lines;
     }
 
     // deubg
     public ArrayList<Object[]> getallLines() {
-        return fm.getAllLines();
+        return fm.getAllLines(getTableByName("TableName").getColumns());
     }
 
     public ArrayList<Table> getTables() {

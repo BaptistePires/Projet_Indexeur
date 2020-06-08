@@ -1,12 +1,12 @@
 package com.dant.app;
 
-import com.dant.indexingengine.*;
 import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
 import com.dant.exception.NoDataException;
 import com.dant.exception.UnsupportedTypeException;
+import com.dant.indexingengine.*;
 import com.dant.utils.IndexerUtil;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -14,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.jboss.resteasy.annotations.GZIP;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -176,7 +177,7 @@ public class IndexerEndpoint {
 //			}
 //		};
 //		t.start();
-		indexingEngine.startIndexing("", "TableName");
+		indexingEngine.startIndexing(uploadedFilePath, "TableName");
 		return Response.status(200).entity("Indexing started").build();
 	}
 
@@ -205,8 +206,8 @@ public class IndexerEndpoint {
 	@POST
 	@GZIP
 	@Path("/query")
-	public Response testQuery(Query q) throws NoDataException {
-//    	log.info("Received " + q.toString());
+	public Response testQuery(Query q) throws NoDataException, IOException {
+    	System.out.println("Received " + q.toString());
 		return Response
 				.status(200)
 				.type(MediaType.APPLICATION_JSON_TYPE)

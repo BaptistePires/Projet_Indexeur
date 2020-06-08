@@ -2,12 +2,11 @@ package com.dant.indexingengine;
 
 import com.dant.exception.NoDataException;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-
-import java.util.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class QueryHandler {
 
@@ -30,11 +29,15 @@ public class QueryHandler {
 	 * @param q : Query object
 	 * @return {@link List <JsonObject>} : Query results
 	 */
-	public JsonObject handleQuery(Query q) throws NoDataException {
+	public JsonObject handleQuery(Query q) throws NoDataException, IOException {
 		if(!q.getType().equalsIgnoreCase("select")) throw new NoDataException();
+		List<String> columns;
 		JsonObject returnedData = new JsonObject();
-		returnedData.add("columns",  new Gson().toJsonTree(q.cols));
-		Object[] lines = indexer.handleQuery(q);
+		if (q.cols.get(0).equals("*"))
+			returnedData.add("columns", new Gson().toJsonTree(indexer.getTableByName(q.table).getColumnsName()));
+		else
+			returnedData.add("columns",  new Gson().toJsonTree(q.cols));
+		ArrayList<Object[]> lines = indexer.handleQuery(q);
 		returnedData.add("lines",  new Gson().toJsonTree(lines));
 		returnedData.add("initial_query", new Gson().toJsonTree(q));
 		return returnedData;
