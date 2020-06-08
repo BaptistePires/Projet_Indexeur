@@ -7,9 +7,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 
 public abstract class Column implements Serializable {
 
@@ -64,8 +61,14 @@ public abstract class Column implements Serializable {
     }
 
     public ArrayList<Integer> getLinesForIndex(Object o, int limit) throws IOException {
+
         if(isIndexed()) {
-            return new ArrayList<>(index.get(o, limit));
+            if (this instanceof IntegerColumn) {
+                return new ArrayList<>(index.get(((Double) o).intValue(), limit));
+            } else {
+                return new ArrayList<>(index.get(o, limit));
+            }
+
         }
         // TODO : Handle non-indexed columns (linear search ?)
         return new ArrayList<>();
