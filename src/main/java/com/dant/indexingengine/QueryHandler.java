@@ -34,7 +34,7 @@ public class QueryHandler {
 		List<String> columns;
 		JsonObject returnedData = new JsonObject();
 		if (q.cols.get(0).equals("*"))
-			returnedData.add("columns", new Gson().toJsonTree(indexer.getTableByName(q.table).getColumnsName()));
+			returnedData.add("columns", new Gson().toJsonTree(indexer.getTableByName(q.from).getColumnsName()));
 		else
 			returnedData.add("columns",  new Gson().toJsonTree(q.cols));
 		ArrayList<Object[]> lines = indexer.handleQuery(q);

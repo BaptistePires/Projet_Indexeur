@@ -20,15 +20,15 @@ public class Query {
     int limit;
 
     @Expose
-    String table;
+    String from;
 
 
-    public Query(String type, List<String> cols, Map<String, Map<String, Object>> conditions, int limit, String table) {
+    public Query(String type, List<String> cols, Map<String, Map<String, Object>> conditions, int limit, String from) {
         this.type = type;
         this.cols = cols;
         this.conditions = conditions;
         this.limit = limit;
-        this.table = table;
+        this.from = from;
     }
 
     public String getType() {
@@ -62,7 +62,7 @@ public class Query {
         sb.append("Type    : ").append(type).append("\n");
         sb.append("Columns : ").append(cols).append("\n");
         sb.append("Limit    : ").append(limit).append("\n");
-        sb.append("Table    : ").append(table).append("\n");
+        sb.append("Table    : ").append(from).append("\n");
         sb.append("Conditions : ").append("\n");
         for (Map.Entry<String, Map<String, Object>> e : conditions.entrySet()) {
             sb.append("\t").append(e.getKey()).append("\n");
