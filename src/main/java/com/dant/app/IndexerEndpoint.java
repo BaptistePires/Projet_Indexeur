@@ -33,6 +33,7 @@ public class IndexerEndpoint {
 	private IndexingEngineSingleton indexingEngine = IndexingEngineSingleton.getInstance();
 	private QueryHandler queryHandler = QueryHandler.getInstance();
 	private static String uploadedFilePath = "";
+	private static String lastCreatedTableName = "";
 
 	// POST
 	@POST
@@ -74,6 +75,7 @@ public class IndexerEndpoint {
 			table.addColumn(c);
 		}
 		indexingEngine.addTable(table);
+		lastCreatedTableName = tableName;
 
 		return Response.status(201).entity("Table \"" + tableName + "\" has been created").build();
 	}
@@ -177,7 +179,7 @@ public class IndexerEndpoint {
 //			}
 //		};
 //		t.start();
-		indexingEngine.startIndexing(uploadedFilePath, "TableName");
+		indexingEngine.startIndexing(uploadedFilePath, lastCreatedTableName);
 		return Response.status(200).entity("Indexing started").build();
 	}
 

@@ -1,5 +1,6 @@
 package com.dant.indexingengine;
 
+import com.dant.exception.NoDataException;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
@@ -142,7 +143,7 @@ public class IndexingEngineSingleton {
     }
 
 
-    public ArrayList<Object[]> handleQuery(Query q) throws IOException {
+    public ArrayList<Object[]> handleQuery(Query q) throws IOException, NoDataException {
         ArrayList<Object[]> lines;
         ArrayList<Column> selectedCols;
         Table t = getTableByName(q.table);
@@ -156,6 +157,8 @@ public class IndexingEngineSingleton {
                 resultLines = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
             }
         }
+
+        if (resultLines.isEmpty()) throw new NoDataException();
 
 		if (q.cols.get(0).equals("*")) selectedCols = t.getColumns();
 		else selectedCols = t.getColumnsByNames(q.cols);

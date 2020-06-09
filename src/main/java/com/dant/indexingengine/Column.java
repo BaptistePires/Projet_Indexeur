@@ -64,6 +64,8 @@ public abstract class Column implements Serializable {
 
         if(isIndexed()) {
             if (this instanceof IntegerColumn) {
+                if (o instanceof Integer) return new ArrayList<>(index.get(o, limit));
+                // Else if Double cast to Integer
                 return new ArrayList<>(index.get(((Double) o).intValue(), limit));
             } else {
                 return new ArrayList<>(index.get(o, limit));
