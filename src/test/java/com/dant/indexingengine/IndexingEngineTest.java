@@ -27,7 +27,7 @@ class IndexingEngineTest {
 	static IndexingEngineSingleton indexingEngineSingleton = IndexingEngineSingleton.getInstance();
 
 	private static final String TEST_FILE_LOCATION
-			= Paths.get(".", "src", "main", "resources", "csv", "unit_tests.csv").toString();
+			= Paths.get(".", "src", "main", "resources", "uploads", "unit_tests.csv").toString();
 
 	private static final String TABLE_NAME = "nyc_cab";
 	private static final String INDEXED_COL_NAME = "VendorID";

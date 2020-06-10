@@ -54,19 +54,17 @@ public class IndexingEngineSingleton {
      * @throws {@link IOException}
      */
     public void startIndexing(String fileName, String tableName) throws IOException {
+
         // Files related vars
-//        String fileName = "src/main/resources/csv/test.csv";
-        //String fileName = "src/main/resources/csv/yellow_tripdata_2019-01.csv";
         FileInputStream fis = new FileInputStream(fileName);
         InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
         CSVReader reader = new CSVReader(isr);
 
-        String outputFilePath = "src/main/resources/csv/DataOutputFile.bin";
+        String outputFilePath = Paths.get("src", "main", "resources", "tmp", "DataOutputFiles").toString();
         DataOutputStream out = new DataOutputStream((new BufferedOutputStream(new FileOutputStream(outputFilePath))));
 
         // Reading CSV vars
         String[] lineArray;
-        String line;
         Object[] castedLine;
         int i, headerLength;
 
@@ -100,7 +98,7 @@ public class IndexingEngineSingleton {
                 // Write line on disk
                 noLine = fm.writeLine(castedLine, t.getColumns());
 
-                //                 Update indexes
+                // Update indexes
                 for (Column c : indexedColumns) {
 //                    castedLine[c.getColumnNo()] = c.castAndUpdateMetaData(lineArray[c.getColumnNo()]);
                     c.index(castedLine[c.getColumnNo()], (int) noLine);

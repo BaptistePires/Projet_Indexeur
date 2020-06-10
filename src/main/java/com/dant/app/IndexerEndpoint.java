@@ -146,7 +146,7 @@ public class IndexerEndpoint {
                     byte[] bytes = IOUtils.toByteArray(inputStream);
 
                     // to path
-                    location = Paths.get(".", "src", "main", "resources", "csv", fileName).toString();
+                    location = Paths.get(".", "src", "main", "resources", "uploads", fileName).toString();
                     uploadedFilePath = location;
 
                     // saving
