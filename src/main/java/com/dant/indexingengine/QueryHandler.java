@@ -4,7 +4,6 @@ import com.dant.exception.NoDataException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +39,7 @@ public class QueryHandler {
         else
             returnedData.add("columns", new Gson().toJsonTree(q.cols));
         ArrayList<Object[]> lines = indexer.handleQuery(q);
+        if (lines.isEmpty()) throw new NoDataException();
         returnedData.add("count", new Gson().toJsonTree(lines.size()));
         returnedData.add("lines", new Gson().toJsonTree(lines));
 

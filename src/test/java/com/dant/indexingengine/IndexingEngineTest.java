@@ -27,7 +27,8 @@ class IndexingEngineTest {
 			= Paths.get(".", "src", "main", "resources", "csv", "unit_tests.csv").toString();
 
 	private static final String TABLE_NAME = "nyc_cab";
-	private static final String INDEXED_COL_NAME = "VendorID";
+	private static final String INDEXED_COL_NAME_1 = "VendorID";
+	private static final String INDEXED_COL_NAME_2 = "passenger_count";
 
 	@BeforeAll
 	static void setUp() throws UnsupportedTypeException, TableNotFoundException, IOException {
@@ -54,13 +55,14 @@ class IndexingEngineTest {
 
 		indexingEngineSingleton.addTable(table);
 
-		indexingEngineSingleton.getTableByName(TABLE_NAME).getColumnByName(INDEXED_COL_NAME).setIndexed();
+		indexingEngineSingleton.getTableByName(TABLE_NAME).getColumnByName(INDEXED_COL_NAME_1).setIndexed();
+		indexingEngineSingleton.getTableByName(TABLE_NAME).getColumnByName(INDEXED_COL_NAME_2).setIndexed();
 
 		indexingEngineSingleton.startIndexing(TEST_FILE_LOCATION, TABLE_NAME);
 	}
 
 	@Test
-	void should_return_json_object_list() {
+	void should_return_json_object_list_with_one_condition() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
 		cols.add("VendorID");
@@ -70,6 +72,43 @@ class IndexingEngineTest {
 		operation.put("operator", "=");
 		operation.put("value", 2.0);
 		conditions.put("VendorID", operation);
+
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME);
+
+		// WHEN
+		JsonObject result;
+		try {
+			result = queryHandler.handleQuery(q);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = new JsonObject();
+		}
+
+		// THEN
+		assertEquals(8, result.getAsJsonArray("lines").size());
+	}
+
+	@Test
+	void should_return_json_object_list_with_more_conditions() {
+		// GIVEN
+		List<String> cols = new ArrayList<>();
+		cols.add("VendorID");
+		cols.add("passenger_count");
+
+		Map<String, Map<String, Object>> conditions = new HashMap<>();
+
+		// Condition 1
+		Map<String, Object> operation1 = new HashMap<>();
+		operation1.put("operator", "=");
+		operation1.put("value", 1);
+
+		// Condition 2
+		Map<String, Object> operation2 = new HashMap<>();
+		operation2.put("operator", "=");
+		operation2.put("value", 1);
+
+		conditions.put("VendorID", operation1);
+		conditions.put("passenger_count", operation2);
 
 		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME);
 
