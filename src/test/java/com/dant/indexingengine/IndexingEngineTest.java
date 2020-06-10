@@ -76,7 +76,7 @@ class IndexingEngineTest {
 		operation.put("value", 2.0);
 		conditions.put("VendorID", operation);
 
-		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME);
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "AND");
 
 		// WHEN
 		JsonObject result;
@@ -92,7 +92,7 @@ class IndexingEngineTest {
 	}
 
 	@Test
-	void should_return_json_object_list_with_more_conditions() {
+	void should_return_json_object_list_with_more_conditions_AND() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
 		cols.add("VendorID");
@@ -113,7 +113,7 @@ class IndexingEngineTest {
 		conditions.put("VendorID", operation1);
 		conditions.put("passenger_count", operation2);
 
-		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME);
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "AND");
 
 		// WHEN
 		JsonObject result;
@@ -128,8 +128,45 @@ class IndexingEngineTest {
 		assertEquals(8, result.getAsJsonArray("lines").size());
 	}
 
+	@Test
+	void should_return_json_object_list_with_more_conditions_OR() {
+		// GIVEN
+		List<String> cols = new ArrayList<>();
+		cols.add("VendorID");
+		cols.add("passenger_count");
+
+		Map<String, Map<String, Object>> conditions = new HashMap<>();
+
+		// Condition 1
+		Map<String, Object> operation1 = new HashMap<>();
+		operation1.put("operator", "=");
+		operation1.put("value", 2);
+
+		// Condition 2
+		Map<String, Object> operation2 = new HashMap<>();
+		operation2.put("operator", "=");
+		operation2.put("value", 2);
+
+		conditions.put("VendorID", operation1);
+		conditions.put("passenger_count", operation2);
+
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "OR");
+
+		// WHEN
+		JsonObject result;
+		try {
+			result = queryHandler.handleQuery(q);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = new JsonObject();
+		}
+
+		// THEN
+		assertEquals(10, result.getAsJsonArray("lines").size());
+	}
+
 	@Test()
-	void should_throw_no_data_exception() {
+	void should_throw_no_data_exception_simple_query() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
 		cols.add("VendorID");
@@ -140,12 +177,76 @@ class IndexingEngineTest {
 		operation.put("value", 5);
 		conditions.put("VendorID", operation);
 
-		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME);
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "AND");
 
 		// WHEN, THEN
 		assertThrows(NoDataException.class, () -> {
 			JsonObject result = queryHandler.handleQuery(q);
 		});
 	}
+
+	@Test
+	void should_throw_no_data_exception_multiple_AND_query() {
+		// GIVEN
+		List<String> cols = new ArrayList<>();
+		cols.add("VendorID");
+		cols.add("passenger_count");
+
+		Map<String, Map<String, Object>> conditions = new HashMap<>();
+
+		// Condition 1
+		Map<String, Object> operation1 = new HashMap<>();
+		operation1.put("operator", "=");
+		operation1.put("value", 2);
+
+		// Condition 2
+		Map<String, Object> operation2 = new HashMap<>();
+		operation2.put("operator", "=");
+		operation2.put("value", 2);
+
+		conditions.put("VendorID", operation1);
+		conditions.put("passenger_count", operation2);
+
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "AND");
+
+		// WHEN, THEN
+		final JsonObject[] result = new JsonObject[1];
+		assertThrows(NoDataException.class, () -> {
+			result[0] = queryHandler.handleQuery(q);
+		});
+	}
+
+	@Test
+	void should_throw_no_data_exception_multiple_OR_query() {
+		// GIVEN
+		List<String> cols = new ArrayList<>();
+		cols.add("VendorID");
+		cols.add("passenger_count");
+
+		Map<String, Map<String, Object>> conditions = new HashMap<>();
+
+		// Condition 1
+		Map<String, Object> operation1 = new HashMap<>();
+		operation1.put("operator", "=");
+		operation1.put("value", 3);
+
+		// Condition 2
+		Map<String, Object> operation2 = new HashMap<>();
+		operation2.put("operator", "=");
+		operation2.put("value", 6);
+
+		conditions.put("VendorID", operation1);
+		conditions.put("passenger_count", operation2);
+
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "OR");
+
+		// WHEN, THEN
+		final JsonObject[] result = new JsonObject[1];
+		assertThrows(NoDataException.class, () -> {
+			result[0] = queryHandler.handleQuery(q);
+		});
+	}
+
+
 
 }
