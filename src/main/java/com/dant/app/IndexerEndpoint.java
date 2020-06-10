@@ -1,9 +1,6 @@
 package com.dant.app;
 
-import com.dant.exception.InvalidFileException;
-import com.dant.exception.InvalidIndexException;
-import com.dant.exception.NoDataException;
-import com.dant.exception.UnsupportedTypeException;
+import com.dant.exception.*;
 import com.dant.indexingengine.*;
 import com.dant.utils.IndexerUtil;
 import com.google.gson.JsonArray;
@@ -158,7 +155,7 @@ public class IndexerEndpoint {
 
 	@POST
 	@Path("/startIndexing")
-	public Response startIndexing() throws IOException {
+	public Response startIndexing() throws IOException, TableNotFoundException {
 //		if (!indexingEngine.canIndex()) {
 //			return Response.status(403).entity("IndexingEngine is not ready to process your data").build();
 //		}
