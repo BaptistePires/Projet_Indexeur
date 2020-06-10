@@ -1,7 +1,6 @@
 package com.dant.indexingengine;
 
 import com.dant.indexingengine.columns.Column;
-
 import com.dant.indexingengine.indexes.BasicIndex;
 import com.google.gson.annotations.Expose;
 

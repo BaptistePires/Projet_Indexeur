@@ -11,13 +11,13 @@ import java.util.List;
  * This class will be used as an Index based on a HashMap.
  */
 public class HashIndex extends BasicIndex {
-    
+
     private HashMap<Object, IndexLinesOlder> indexedLines;
 
     public HashIndex() {
         indexedLines = new HashMap<>();
     }
-    
+
     @Override
     public void indexObject(Object o, int noLine) throws IOException {
         indexedLines.computeIfAbsent(o, k -> {

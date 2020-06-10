@@ -25,7 +25,7 @@ public abstract class Column implements Serializable {
     @Expose
     private boolean isIndexed;
 
-    private BasicIndex index;
+    protected BasicIndex index;
 
     public Column(String name) throws UnsupportedTypeException {
         this.name = name;

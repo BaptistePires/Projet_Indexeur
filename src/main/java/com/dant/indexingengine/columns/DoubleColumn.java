@@ -1,6 +1,7 @@
 package com.dant.indexingengine.columns;
 
 import com.dant.exception.UnsupportedTypeException;
+import com.dant.indexingengine.indexes.NumberIndex;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -9,6 +10,7 @@ public class DoubleColumn extends Column {
 
     public DoubleColumn(String name) throws UnsupportedTypeException {
         super(name);
+        index = new NumberIndex(this);
     }
 
     @Override
