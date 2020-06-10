@@ -78,14 +78,14 @@ testem.log
 Thumbs.db
 
 # Custom
-src/main/resources/csv/*.csv
-
-# Except
-!src/main/resources/csv/test.csv
+/src/main/resources/csv/*.csv
 /src/main/resources/csv/cp.py
 /src/main/resources/csv/linesPositions.bin
 /src/main/resources/csv/linesPos.bin
-!src/main/resources/csv/unit_tests.csv
 /src/main/resources/csv/saved.bin
 /src/main/resources/csv/DataOutputFile.bin
-/src/main/resources/tmp/
+/src/main/resources/tmp/*
+
+# Except
+!src/main/resources/csv/test.csv
+!src/main/resources/csv/unit_tests.csv

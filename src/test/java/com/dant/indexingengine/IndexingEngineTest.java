@@ -1,6 +1,7 @@
 package com.dant.indexingengine;
 
 import com.dant.exception.NoDataException;
+import com.dant.exception.TableNotFoundException;
 import com.dant.exception.UnsupportedTypeException;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,7 +30,7 @@ class IndexingEngineTest {
 	private static final String INDEXED_COL_NAME = "VendorID";
 
 	@BeforeAll
-	static void setUp() throws UnsupportedTypeException, IOException {
+	static void setUp() throws UnsupportedTypeException, TableNotFoundException, IOException {
 		Table table = new Table(TABLE_NAME);
 
 		table.addColumn(new IntegerColumn("VendorID"));
