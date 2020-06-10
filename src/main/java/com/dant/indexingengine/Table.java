@@ -1,5 +1,7 @@
 package com.dant.indexingengine;
 
+import com.dant.indexingengine.columns.Column;
+import com.dant.indexingengine.indexes.BasicIndex;
 import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
@@ -29,7 +31,7 @@ public class Table implements Serializable {
      * that are used to index data.
      */
     @Expose
-    private final HashMap<Column[], SimpleIndex> indexes;
+    private final HashMap<Column[], BasicIndex> indexes;
 
     @Expose
     private String name;
@@ -49,10 +51,6 @@ public class Table implements Serializable {
     public void addColumn(Column c) {
         columns.add(c);
         columnsMappedByName.put(c.getName(), c);
-    }
-
-    public void addIndexByName(Column[] columns) {
-        indexes.put(columns, new SimpleIndex());
     }
 
     public void removeColumnByName(String name) {
@@ -120,7 +118,7 @@ public class Table implements Serializable {
         columns.sort(Comparator.comparing(Column::getColumnNo));
     }
 
-    public HashMap<Column[], SimpleIndex> getIndexes() {
+    public HashMap<Column[], BasicIndex> getIndexes() {
         return indexes;
     }
 

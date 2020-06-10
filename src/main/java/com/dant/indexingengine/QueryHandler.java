@@ -4,7 +4,6 @@ import com.dant.exception.NoDataException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +39,7 @@ public class QueryHandler {
         else
             returnedData.add("columns", new Gson().toJsonTree(q.cols));
         ArrayList<Object[]> lines = indexer.handleQuery(q);
+        if (lines.isEmpty()) throw new NoDataException();
         returnedData.add("count", new Gson().toJsonTree(lines.size()));
         returnedData.add("lines", new Gson().toJsonTree(lines));
 
@@ -84,27 +84,4 @@ public class QueryHandler {
 //		}
     }
 
-    /**
-     * For testing, returns line numbers of query results, not actual data
-     */
-    public List<Integer> getResultAsLineNumbers(Query q) throws NoDataException {
-        List<Integer> lineNumbers = new ArrayList<>();
-
-//		try {
-//			if (q.getType().equalsIgnoreCase("select")) {
-//				HashMap<String, Object> tmpIndex = new HashMap<>();
-//				for (Map.Entry<String, Map<String, Object>> entry : q.getConditions().entrySet()) {
-//
-//					if (entry.getValue().get("operator").equals("=")) {
-//						tmpIndex.put(entry.getKey(), indexer.getTable().getColumnByName(entry.getKey()).castStringToType(entry.getValue().get("value").toString()));
-//					}
-//				}
-//				lineNumbers = indexer.getIndexedData().get(tmpIndex);
-//			}
-//		} catch (Exception e) {
-//			throw new NoDataException();
-//		}
-
-        return lineNumbers;
-    }
 }

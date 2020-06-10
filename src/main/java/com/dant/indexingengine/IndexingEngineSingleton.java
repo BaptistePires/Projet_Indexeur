@@ -1,6 +1,7 @@
 package com.dant.indexingengine;
 
 import com.dant.exception.NonIndexedColumn;
+import com.dant.indexingengine.columns.Column;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
@@ -8,6 +9,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
 // Will work with only one index currently
@@ -53,19 +56,17 @@ public class IndexingEngineSingleton {
      * @throws {@link IOException}
      */
     public void startIndexing(String fileName, String tableName) throws IOException {
+
         // Files related vars
-//        String fileName = "src/main/resources/csv/test.csv";
-        //String fileName = "src/main/resources/csv/yellow_tripdata_2019-01.csv";
         FileInputStream fis = new FileInputStream(fileName);
         InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
         CSVReader reader = new CSVReader(isr);
 
-        String outputFilePath = "src/main/resources/csv/DataOutputFile.bin";
+        String outputFilePath = Paths.get("src", "main", "resources", "tmp", "DataOutputFiles").toString();
         DataOutputStream out = new DataOutputStream((new BufferedOutputStream(new FileOutputStream(outputFilePath))));
 
         // Reading CSV vars
         String[] lineArray;
-        String line;
         Object[] castedLine;
         int i, headerLength;
 
@@ -99,7 +100,7 @@ public class IndexingEngineSingleton {
                 // Write line on disk
                 noLine = fm.writeLine(castedLine, t.getColumns());
 
-                //                 Update indexes
+                // Update indexes
                 for (Column c : indexedColumns) {
 //                    castedLine[c.getColumnNo()] = c.castAndUpdateMetaData(lineArray[c.getColumnNo()]);
                     c.index(castedLine[c.getColumnNo()], (int) noLine);
@@ -123,25 +124,45 @@ public class IndexingEngineSingleton {
         ArrayList<Column> selectedCols;
         Table t = getTableByName(q.from);
 
-        ArrayList<Integer> linesNumber = new ArrayList<>();
+        ArrayList<Integer> resultLineNos = new ArrayList<>();
+        ArrayList<Integer> otherFilter;
+
         ArrayList<Object[]> returnedLines = new ArrayList<>();
         ArrayList<Map.Entry<String, Map<String, Object>>> nonIndexedColsConditions = new ArrayList<>();
+        int nbCond = 0;
         // Iterate through conditions
-        for (Map.Entry<String, Map<String, Object>> entry : q.conditions.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> entry : q.where.entrySet()) {
             try {
                 if (entry.getValue().get("operator").equals("=")) {
-                    linesNumber = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
+                    otherFilter = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
+                    if (resultLineNos.isEmpty()) resultLineNos = otherFilter;
+                    else {
+                        if (q.operator.equalsIgnoreCase("and"))
+                            resultLineNos.retainAll(otherFilter); // Intersect
+                        if (q.operator.equalsIgnoreCase("or")) {
+                            resultLineNos = (ArrayList<Integer>)
+                                    Stream.concat(resultLineNos.stream(), otherFilter.stream())
+                                            .distinct()
+                                            .collect(Collectors.toList());
+                            Collections.sort(resultLineNos);
+                        }
+                    }
+                    nbCond++;
                 }
             } catch (NonIndexedColumn e) {
                 nonIndexedColsConditions.add(entry);
             }
-            if (linesNumber.size() >= q.limit) break;
+            // Don't stop before processing all conditions, truncate if necessary
+            if (nbCond == q.where.entrySet().size() && (resultLineNos.size() >= q.limit))
+                resultLineNos = (ArrayList<Integer>) resultLineNos.stream()
+                        .limit(q.limit)
+                        .collect(Collectors.toList());
         }
 
         // Handle non indexed cols
         int testedLines = 0;
         Object lineValue;
-        while (linesNumber.size() + returnedLines.size() < q.limit) {
+        while (resultLineNos.size() + returnedLines.size() < q.limit) {
             try {
                 for (Object[] o : fm.getLinesInterval(testedLines, testedLines + 1000, t.getColumns(), t.getColumns())) {
                     for (Map.Entry<String, Map<String, Object>> e : nonIndexedColsConditions) {
@@ -163,8 +184,8 @@ public class IndexingEngineSingleton {
         if (q.cols.get(0).equals("*")) selectedCols = t.getColumns();
         else selectedCols = t.getColumnsByNames(q.cols);
 
-        if (!linesNumber.isEmpty()) {
-            returnedLines.addAll(fm.getLines(linesNumber, t.getColumns(), selectedCols));
+        if (!resultLineNos.isEmpty()) {
+            returnedLines.addAll(fm.getLines(resultLineNos, t.getColumns(), selectedCols));
         }
         return new ArrayList<>(returnedLines.subList(0, Math.min(q.limit, returnedLines.size())));
     }

@@ -1,5 +1,6 @@
 package com.dant.indexingengine;
 
+import com.dant.indexingengine.columns.Column;
 import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.FileNotFoundException;
@@ -63,7 +64,7 @@ public class FileManager {
     }
 
     private long[] readPositionOfLine(int noLine) throws IOException {
-        System.out.println(noLine);
+
         long startPosition = BYTE_SIZE_LONG_ARRAY * noLine;
         if (noLine > 1) startPosition++;
         byte[] positionArrayBytes = new byte[BYTE_SIZE_LONG_ARRAY];

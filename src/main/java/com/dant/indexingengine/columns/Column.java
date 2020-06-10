@@ -1,7 +1,9 @@
-package com.dant.indexingengine;
+package com.dant.indexingengine.columns;
 
 import com.dant.exception.NonIndexedColumn;
 import com.dant.exception.UnsupportedTypeException;
+import com.dant.indexingengine.indexes.BasicIndex;
+import com.dant.indexingengine.indexes.HashIndex;
 import com.google.gson.annotations.Expose;
 
 import java.io.IOException;
@@ -23,7 +25,7 @@ public abstract class Column implements Serializable {
     @Expose
     private boolean isIndexed;
 
-    private SimpleIndex index;
+    protected BasicIndex index;
 
     public Column(String name) throws UnsupportedTypeException {
         this.name = name;
@@ -50,7 +52,7 @@ public abstract class Column implements Serializable {
 
     public final void setIndexed() {
         isIndexed = true;
-        index = new SimpleIndex();
+        index = new HashIndex();
     }
 
     public boolean isIndexed() {
@@ -59,7 +61,7 @@ public abstract class Column implements Serializable {
 
     public void index(Object o, int noLine) throws IOException {
         if (isIndexed()) {
-            index.index(o, noLine);
+            index.indexObject(o, noLine);
         }
     }
 
@@ -73,11 +75,11 @@ public abstract class Column implements Serializable {
 
         if (isIndexed()) {
             if (this instanceof IntegerColumn) {
-                if (o instanceof Integer) return new ArrayList<>(index.get(o, limit));
+                if (o instanceof Integer) return new ArrayList<>(index.findLinesForObject(o, limit));
                 // Else if Double cast to Integer
-                return new ArrayList<>(index.get(((Double) o).intValue(), limit));
+                return new ArrayList<>(index.findLinesForObject(((Double) o).intValue(), limit));
             } else {
-                return new ArrayList<>(index.get(o, limit));
+                return new ArrayList<>(index.findLinesForObject(o, limit));
             }
 
         }

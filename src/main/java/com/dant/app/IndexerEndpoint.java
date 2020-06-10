@@ -2,9 +2,15 @@ package com.dant.app;
 
 import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
-import com.dant.exception.NoDataException;
 import com.dant.exception.UnsupportedTypeException;
-import com.dant.indexingengine.*;
+import com.dant.indexingengine.IndexingEngineSingleton;
+import com.dant.indexingengine.Query;
+import com.dant.indexingengine.QueryHandler;
+import com.dant.indexingengine.Table;
+import com.dant.indexingengine.columns.Column;
+import com.dant.indexingengine.columns.DoubleColumn;
+import com.dant.indexingengine.columns.IntegerColumn;
+import com.dant.indexingengine.columns.StringColumn;
 import com.dant.utils.IndexerUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -143,7 +149,7 @@ public class IndexerEndpoint {
                     byte[] bytes = IOUtils.toByteArray(inputStream);
 
                     // to path
-                    location = Paths.get(".", "src", "main", "resources", "csv", fileName).toString();
+                    location = Paths.get(".", "src", "main", "resources", "uploads", fileName).toString();
                     uploadedFilePath = location;
 
                     // saving

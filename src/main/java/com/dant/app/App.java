@@ -2,15 +2,16 @@ package com.dant.app;
 
 import com.dant.exception.*;
 import com.dant.filter.GsonProvider;
-import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
+
+//import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
+//import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  * Created by pitton on 2017-02-20.
@@ -37,10 +38,10 @@ public class App extends Application {
         sets.add(InvalidFileExceptionMapper.class);
         sets.add(NoDataException.class);
         sets.add(NoDataExceptionMapper.class);
-        sets.add(OpenApiResource.class);
-        sets.add(AcceptHeaderOpenApiResource.class);
-        sets.add(Logger.class);
-        sets.add(LoggerFactory.class);
+//        sets.add(OpenApiResource.class);
+//        sets.add(AcceptHeaderOpenApiResource.class);
+//        sets.add(Logger.class);
+//        sets.add(LoggerFactory.class);
         return sets;
     }
 }

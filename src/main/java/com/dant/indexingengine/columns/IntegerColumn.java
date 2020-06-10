@@ -1,6 +1,7 @@
-package com.dant.indexingengine;
+package com.dant.indexingengine.columns;
 
 import com.dant.exception.UnsupportedTypeException;
+import com.dant.indexingengine.indexes.NumberIndex;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -14,6 +15,7 @@ public class IntegerColumn extends Column {
         super(name);
         max = min = 0;
         avg = 0d;
+        index = new NumberIndex(this);
     }
 
     @Override
