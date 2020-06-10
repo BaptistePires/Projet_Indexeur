@@ -13,23 +13,23 @@ public class Table implements Serializable {
      * we don't want any duplicated columns.
      */
     @Expose
-    private ArrayList<Column> columns;
+    private final ArrayList<Column> columns;
 
     /**
      * columnMappedByName : Map indexing columns by their names, can be useful when we load a .csv
      * file and need to retrieve header's columns types.
      */
-    private Map<String, Column> columnsMappedByName;
+    private final Map<String, Column> columnsMappedByName;
 
 
-    private Map<Integer, Column> columnsMappedByNo;
+    private final Map<Integer, Column> columnsMappedByNo;
 
     /**
      * indexes : Can be interpreted as a sub-set of columns, it contains references to columns
      * that are used to index data.
      */
     @Expose
-    private HashMap<Column[], SimpleIndex> indexes;
+    private final HashMap<Column[], SimpleIndex> indexes;
 
     @Expose
     private String name;
@@ -126,8 +126,8 @@ public class Table implements Serializable {
 
     public ArrayList<Column> getIndexedColumns() {
         ArrayList<Column> tmp = new ArrayList<>();
-        for(Column c : columns) {
-            if(c.isIndexed()) tmp.add(c);
+        for (Column c : columns) {
+            if (c.isIndexed()) tmp.add(c);
         }
         return tmp;
     }

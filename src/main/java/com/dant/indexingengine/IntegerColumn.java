@@ -17,14 +17,19 @@ public class IntegerColumn extends Column {
     }
 
     @Override
-    public Object castAndUpdateMetaData(String o) {
-        int x = Integer.parseInt(o);
-        if(x > max) max = x;
-        else if(x < min) min = x;
+    public Object castAndUpdateMetaData(String s) {
+        int x = (int) castString(s);
+        if (x > max) max = x;
+        else if (x < min) min = x;
         avg += x;
         avg /= 2.;
-
         return x;
+    }
+
+    @Override
+    public Object castString(String s) {
+        return (int) Double.parseDouble(s);
+
     }
 
     @Override

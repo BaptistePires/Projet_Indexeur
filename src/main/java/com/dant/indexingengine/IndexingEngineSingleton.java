@@ -1,6 +1,6 @@
 package com.dant.indexingengine;
 
-import com.dant.exception.NoDataException;
+import com.dant.exception.NonIndexedColumn;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
@@ -14,13 +14,13 @@ import java.util.*;
 public class IndexingEngineSingleton {
     private static final IndexingEngineSingleton INSTANCE;
 
-    private ArrayList<Table> tables;
+    private final ArrayList<Table> tables;
     private FileManager fm;
     private HashMap<Integer, Integer> index;
-    private Set<String> pathsAllocated;
+    private final Set<String> pathsAllocated;
 
-    private boolean indexed;
-    private boolean indexing;
+    private final boolean indexed;
+    private final boolean indexing;
     private boolean error;
 
     private int lineNum;
@@ -87,7 +87,7 @@ public class IndexingEngineSingleton {
             for (i = 0; i < headerLength; i++) {
                 t.getColumnByName(lineArray[i]).setColumnNo(i);
             }
-            
+
             t.sortColumnsByNo();
             long noLine = 0;
             while ((lineArray = reader.readNext()) != null) {
@@ -95,42 +95,17 @@ public class IndexingEngineSingleton {
                 castedLine = new Object[headerLength];
                 for (i = 0; i < headerLength; i++) {
                     castedLine[i] = t.getColumns().get(i).castAndUpdateMetaData(lineArray[i]);
-                    // Write data to file with DataOutputStream
-//                    if (castedLine[i] instanceof Integer) {
-//                        out.writeInt(!lineArray[i].isEmpty() ? (Integer) castedLine[i] : 0);
-//                    } else if (castedLine[i] instanceof Double) {
-//                        out.writeDouble(!lineArray[i].isEmpty() ? (Double) castedLine[i] : 0);
-//                    } else if (castedLine[i] instanceof String) {
-//                        out.writeUTF(!lineArray[i].isEmpty() ? (String) castedLine[i] : "");
-//                    } else {
-//                        System.out.println("Type not known");
-//                    }
                 }
                 // Write line on disk
                 noLine = fm.writeLine(castedLine, t.getColumns());
-//                System.out.println("here");
-//                 Update indexes
-                for(Column c: indexedColumns) {
+
+                //                 Update indexes
+                for (Column c : indexedColumns) {
 //                    castedLine[c.getColumnNo()] = c.castAndUpdateMetaData(lineArray[c.getColumnNo()]);
                     c.index(castedLine[c.getColumnNo()], (int) noLine);
                 }
-//                for(Map.Entry<Column[], SimpleIndex> entry: t.getIndexes().entrySet()){
-//                    ArrayList<String> lst = new ArrayList<>();
-//                    for(Column c : entry.getKey()){
-//                        lst.add(lineArray[c.getColumnNo()]);
-//                    }
-//                    String idx = String.join(",", lst);
-//                    entry.getValue().index(idx,(int) noLine);
-//                }
-//                lineNum++;
-//                System.out.println("l"+lineNum);
             }
-//            out.flush();
-            System.out.println("\n" + noLine + " rows written to " + outputFilePath);
-            //ArrayList<Integer> testt = t.getColumnByName("VendorID").getLinesForIndex(1, 100);
-            //for(int j: testt) {
-            //    System.out.println("VendorID 1 : " +Arrays.toString(fm.readline(j, t.getColumns())));
-            //}
+
         } catch (CsvValidationException e) {
             e.printStackTrace();
             System.out.println("bizarre bizarre");
@@ -143,33 +118,57 @@ public class IndexingEngineSingleton {
     }
 
 
-    public ArrayList<Object[]> handleQuery(Query q) throws IOException, NoDataException {
+    public ArrayList<Object[]> handleQuery(Query q) throws Exception {
         ArrayList<Object[]> lines;
         ArrayList<Column> selectedCols;
         Table t = getTableByName(q.from);
 
-        ArrayList<Integer> resultLines = new ArrayList<>();
-
+        ArrayList<Integer> linesNumber = new ArrayList<>();
+        ArrayList<Object[]> returnedLines = new ArrayList<>();
+        ArrayList<Map.Entry<String, Map<String, Object>>> nonIndexedColsConditions = new ArrayList<>();
         // Iterate through conditions
-        for(Map.Entry<String, Map<String, Object>> entry: q.conditions.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> entry : q.conditions.entrySet()) {
+            try {
+                if (entry.getValue().get("operator").equals("=")) {
+                    linesNumber = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
+                }
+            } catch (NonIndexedColumn e) {
+                nonIndexedColsConditions.add(entry);
+            }
+            if (linesNumber.size() >= q.limit) break;
+        }
 
-            if (entry.getValue().get("operator").equals("=")) {
-                resultLines = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
+        // Handle non indexed cols
+        int testedLines = 0;
+        Object lineValue;
+        while (linesNumber.size() + returnedLines.size() < q.limit) {
+            try {
+                for (Object[] o : fm.getLinesInterval(testedLines, testedLines + 1000, t.getColumns(), t.getColumns())) {
+                    for (Map.Entry<String, Map<String, Object>> e : nonIndexedColsConditions) {
+                        lineValue = o[t.getColumnByName(e.getKey()).getColumnNo()];
+
+                        if (lineValue.equals(t.getColumnByName(e.getKey()).castString(e.getValue().get("value").toString()))) {
+                            returnedLines.add(o);
+                        }
+                    }
+                }
+
+                testedLines += 1000;
+            } catch (IndexOutOfBoundsException e) { // thrown by FileManager when testedLine becomes higher than total lines
+                break;
             }
         }
 
-        if (resultLines.isEmpty()) throw new NoDataException();
 
-		if (q.cols.get(0).equals("*")) selectedCols = t.getColumns();
-		else selectedCols = t.getColumnsByNames(q.cols);
+        if (q.cols.get(0).equals("*")) selectedCols = t.getColumns();
+        else selectedCols = t.getColumnsByNames(q.cols);
 
-        return fm.getLines(resultLines, t.getColumns(), selectedCols);
+        if (!linesNumber.isEmpty()) {
+            returnedLines.addAll(fm.getLines(linesNumber, t.getColumns(), selectedCols));
+        }
+        return new ArrayList<>(returnedLines.subList(0, Math.min(q.limit, returnedLines.size())));
     }
 
-    // debug
-    public ArrayList<Object[]> getallLines() {
-        return fm.getAllLines(getTableByName("TableName").getColumns());
-    }
 
     public ArrayList<Table> getTables() {
         return tables;
@@ -204,10 +203,11 @@ public class IndexingEngineSingleton {
         return indexed && !indexing && !error;
     }
 
-    public String getNewFilePath(){
+    public String getNewFilePath() {
         // TODO : Find a way to clear dirs on server shutdown
         String tmpName = Paths.get("src", "main", "resources", "tmp", UUID.randomUUID().toString()).toString();
-        while(pathsAllocated.contains(tmpName)) tmpName = Paths.get("src", "main", "resources", "tmp", UUID.randomUUID().toString()).toString();
+        while (pathsAllocated.contains(tmpName))
+            tmpName = Paths.get("src", "main", "resources", "tmp", UUID.randomUUID().toString()).toString();
         pathsAllocated.add(tmpName);
         return tmpName;
     }

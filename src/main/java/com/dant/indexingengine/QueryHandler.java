@@ -10,37 +10,41 @@ import java.util.List;
 
 public class QueryHandler {
 
-	private static final QueryHandler INSTANCE;
+    private static final QueryHandler INSTANCE;
 
-	private IndexingEngineSingleton indexer = IndexingEngineSingleton.getInstance();
+    private final IndexingEngineSingleton indexer = IndexingEngineSingleton.getInstance();
 
-	private QueryHandler() {}
+    private QueryHandler() {
+    }
 
-	static {
-		INSTANCE = new QueryHandler();
-	}
+    static {
+        INSTANCE = new QueryHandler();
+    }
 
-	public static QueryHandler getInstance() {
-		return INSTANCE;
-	}
+    public static QueryHandler getInstance() {
+        return INSTANCE;
+    }
 
-	/**
-	 * For handling a query on the .csv
-	 * @param q : Query object
-	 * @return {@link List <JsonObject>} : Query results
-	 */
-	public JsonObject handleQuery(Query q) throws NoDataException, IOException {
-		if(!q.getType().equalsIgnoreCase("select")) throw new NoDataException();
-		List<String> columns;
-		JsonObject returnedData = new JsonObject();
-		if (q.cols.get(0).equals("*"))
-			returnedData.add("columns", new Gson().toJsonTree(indexer.getTableByName(q.from).getColumnsName()));
-		else
-			returnedData.add("columns",  new Gson().toJsonTree(q.cols));
-		ArrayList<Object[]> lines = indexer.handleQuery(q);
-		returnedData.add("lines",  new Gson().toJsonTree(lines));
-		returnedData.add("initial_query", new Gson().toJsonTree(q));
-		return returnedData;
+    /**
+     * For handling a query on the .csv
+     *
+     * @param q : Query object
+     * @return {@link List <JsonObject>} : Query results
+     */
+    public JsonObject handleQuery(Query q) throws Exception {
+        if (!q.getType().equalsIgnoreCase("select")) throw new NoDataException();
+        List<String> columns;
+        JsonObject returnedData = new JsonObject();
+        if (q.cols.get(0).equals("*"))
+            returnedData.add("columns", new Gson().toJsonTree(indexer.getTableByName(q.from).getColumnsName()));
+        else
+            returnedData.add("columns", new Gson().toJsonTree(q.cols));
+        ArrayList<Object[]> lines = indexer.handleQuery(q);
+        returnedData.add("count", new Gson().toJsonTree(lines.size()));
+        returnedData.add("lines", new Gson().toJsonTree(lines));
+
+        returnedData.add("initial_query", new Gson().toJsonTree(q));
+        return returnedData;
 //		RandomAccessFile randomAccessFile = indexer.getRandomAccessFile();
 //		JsonObject jsonObject;
 //		try {
@@ -78,13 +82,13 @@ public class QueryHandler {
 //		} catch (Exception e) {
 //			throw new NoDataException();
 //		}
-	}
+    }
 
-	/**
-	 * For testing, returns line numbers of query results, not actual data
-	 */
-	public List<Integer> getResultAsLineNumbers(Query q) throws NoDataException {
-		List<Integer> lineNumbers = new ArrayList<>();
+    /**
+     * For testing, returns line numbers of query results, not actual data
+     */
+    public List<Integer> getResultAsLineNumbers(Query q) throws NoDataException {
+        List<Integer> lineNumbers = new ArrayList<>();
 
 //		try {
 //			if (q.getType().equalsIgnoreCase("select")) {
@@ -101,6 +105,6 @@ public class QueryHandler {
 //			throw new NoDataException();
 //		}
 
-		return lineNumbers;
-	}
+        return lineNumbers;
+    }
 }

@@ -17,6 +17,11 @@ public class StringColumn extends Column {
     }
 
     @Override
+    public Object castString(String s) {
+        return s;
+    }
+
+    @Override
     public int writeToFile(RandomAccessFile file, Object o) throws IOException {
         long lengthBefore = file.length();
         file.writeUTF((String) o);

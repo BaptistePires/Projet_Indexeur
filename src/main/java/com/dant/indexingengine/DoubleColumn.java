@@ -18,6 +18,11 @@ public class DoubleColumn extends Column {
     }
 
     @Override
+    public Object castString(String s) {
+        return Double.parseDouble(s);
+    }
+
+    @Override
     public int writeToFile(RandomAccessFile file, Object o) throws IOException {
         file.writeDouble((double) o);
         return DOUBLE_BYTE_SIZE;

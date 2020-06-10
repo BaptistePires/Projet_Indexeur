@@ -1,5 +1,6 @@
 package com.dant.indexingengine;
 
+import com.dant.exception.NonIndexedColumn;
 import com.dant.exception.UnsupportedTypeException;
 import com.google.gson.annotations.Expose;
 
@@ -16,7 +17,7 @@ public abstract class Column implements Serializable {
 
 
     @Expose
-    private String name;
+    private final String name;
     @Expose
     private int columnNo;
     @Expose
@@ -45,6 +46,8 @@ public abstract class Column implements Serializable {
 
     public abstract Object castAndUpdateMetaData(String o);
 
+    public abstract Object castString(String s);
+
     public final void setIndexed() {
         isIndexed = true;
         index = new SimpleIndex();
@@ -60,9 +63,15 @@ public abstract class Column implements Serializable {
         }
     }
 
-    public ArrayList<Integer> getLinesForIndex(Object o, int limit) throws IOException {
+    /**
+     * @param o     Value the row should have
+     * @param limit Maximum number of lines returned
+     * @return List of lines
+     * @throws IOException
+     */
+    public ArrayList<Integer> getLinesForIndex(Object o, int limit) throws IOException, NonIndexedColumn {
 
-        if(isIndexed()) {
+        if (isIndexed()) {
             if (this instanceof IntegerColumn) {
                 if (o instanceof Integer) return new ArrayList<>(index.get(o, limit));
                 // Else if Double cast to Integer
@@ -72,8 +81,8 @@ public abstract class Column implements Serializable {
             }
 
         }
-        // TODO : Handle non-indexed columns (linear search ?)
-        return new ArrayList<>();
+
+        throw new NonIndexedColumn(name);
     }
 
     public abstract int writeToFile(RandomAccessFile file, Object o) throws IOException;
