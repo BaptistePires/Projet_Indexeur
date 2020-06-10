@@ -135,11 +135,7 @@ public class IndexingEngineSingleton {
                 if (entry.getValue().get("operator").equals("=")) {
                     filtersIntersect = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
                     if (resultLineNos.isEmpty()) resultLineNos = filtersIntersect;
-                    else {  // Intersect
-                        resultLineNos = (ArrayList<Integer>) resultLineNos.stream()
-                                .filter(filtersIntersect::contains)
-                                .collect(Collectors.toList());
-                    }
+                    else resultLineNos.retainAll(filtersIntersect); // Intersect
                     nbCond++;
                 }
             } catch (NonIndexedColumn e) {
