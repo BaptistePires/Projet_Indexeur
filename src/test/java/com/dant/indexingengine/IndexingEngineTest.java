@@ -29,32 +29,40 @@ class IndexingEngineTest {
 	private static final String TEST_FILE_LOCATION
 			= Paths.get(".", "src", "main", "resources", "uploads", "unit_tests.csv").toString();
 
+	private static String[] columnNames = {"VendorID", "tpep_pickup_datetime", "tpep_dropoff_datetime",
+			"passenger_count", "trip_distance", "RatecodeID", "store_and_fwd_flag", "PULocationID", "DOLocationID",
+			"payment_type", "fare_amount", "extra", "mta_tax", "tip_amount", "tolls_amount", "improvement_surcharge",
+			"total_amount", "congestion_surcharge"};
+
 	private static final String TABLE_NAME = "nyc_cab";
-	private static final String INDEXED_COL_NAME_1 = "VendorID";
-	private static final String INDEXED_COL_NAME_2 = "passenger_count";
+	private static final String INDEXED_COL_NAME_1 = columnNames[0];
+	private static final String INDEXED_COL_NAME_2 = columnNames[3];
+
+	private static final String AND = "AND";
+	private static final String OR = "OR";
 
 	@BeforeAll
 	static void setUp() throws UnsupportedTypeException, TableNotFoundException, IOException {
 		Table table = new Table(TABLE_NAME);
 
-		table.addColumn(new IntegerColumn("VendorID"));
-		table.addColumn(new StringColumn("tpep_pickup_datetime"));
-		table.addColumn(new StringColumn("tpep_dropoff_datetime"));
-		table.addColumn(new IntegerColumn("passenger_count"));
-		table.addColumn(new DoubleColumn("trip_distance"));
-		table.addColumn(new StringColumn("RatecodeID"));
-		table.addColumn(new StringColumn("store_and_fwd_flag"));
-		table.addColumn(new IntegerColumn("PULocationID"));
-		table.addColumn(new IntegerColumn("DOLocationID"));
-		table.addColumn(new IntegerColumn("payment_type"));
-		table.addColumn(new DoubleColumn("fare_amount"));
-		table.addColumn(new DoubleColumn("extra"));
-		table.addColumn(new DoubleColumn("mta_tax"));
-		table.addColumn(new DoubleColumn("tip_amount"));
-		table.addColumn(new DoubleColumn("tolls_amount"));
-		table.addColumn(new DoubleColumn("improvement_surcharge"));
-		table.addColumn(new DoubleColumn("total_amount"));
-		table.addColumn(new DoubleColumn("congestion_surcharge"));
+		table.addColumn(new IntegerColumn(columnNames[0]));
+		table.addColumn(new StringColumn(columnNames[1]));
+		table.addColumn(new StringColumn(columnNames[2]));
+		table.addColumn(new IntegerColumn(columnNames[3]));
+		table.addColumn(new DoubleColumn(columnNames[4]));
+		table.addColumn(new StringColumn(columnNames[5]));
+		table.addColumn(new StringColumn(columnNames[6]));
+		table.addColumn(new IntegerColumn(columnNames[7]));
+		table.addColumn(new IntegerColumn(columnNames[8]));
+		table.addColumn(new IntegerColumn(columnNames[9]));
+		table.addColumn(new DoubleColumn(columnNames[10]));
+		table.addColumn(new DoubleColumn(columnNames[11]));
+		table.addColumn(new DoubleColumn(columnNames[12]));
+		table.addColumn(new DoubleColumn(columnNames[13]));
+		table.addColumn(new DoubleColumn(columnNames[14]));
+		table.addColumn(new DoubleColumn(columnNames[15]));
+		table.addColumn(new DoubleColumn(columnNames[16]));
+		table.addColumn(new DoubleColumn(columnNames[17]));
 
 		indexingEngineSingleton.addTable(table);
 
@@ -68,15 +76,15 @@ class IndexingEngineTest {
 	void should_return_json_object_list_with_one_condition() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
-		cols.add("VendorID");
+		cols.add(columnNames[0]);
 
 		Map<String, Map<String, Object>> conditions = new HashMap<>();
 		Map<String, Object> operation = new HashMap<>();
 		operation.put("operator", "=");
 		operation.put("value", 2.0);
-		conditions.put("VendorID", operation);
+		conditions.put(columnNames[0], operation);
 
-		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "AND");
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, AND);
 
 		// WHEN
 		JsonObject result;
@@ -95,8 +103,8 @@ class IndexingEngineTest {
 	void should_return_json_object_list_with_more_conditions_AND() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
-		cols.add("VendorID");
-		cols.add("passenger_count");
+		cols.add(columnNames[0]);
+		cols.add(columnNames[3]);
 
 		Map<String, Map<String, Object>> conditions = new HashMap<>();
 
@@ -110,10 +118,10 @@ class IndexingEngineTest {
 		operation2.put("operator", "=");
 		operation2.put("value", 1);
 
-		conditions.put("VendorID", operation1);
-		conditions.put("passenger_count", operation2);
+		conditions.put(columnNames[0], operation1);
+		conditions.put(columnNames[3], operation2);
 
-		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "AND");
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, AND);
 
 		// WHEN
 		JsonObject result;
@@ -132,8 +140,8 @@ class IndexingEngineTest {
 	void should_return_json_object_list_with_more_conditions_OR() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
-		cols.add("VendorID");
-		cols.add("passenger_count");
+		cols.add(columnNames[0]);
+		cols.add(columnNames[3]);
 
 		Map<String, Map<String, Object>> conditions = new HashMap<>();
 
@@ -147,10 +155,10 @@ class IndexingEngineTest {
 		operation2.put("operator", "=");
 		operation2.put("value", 2);
 
-		conditions.put("VendorID", operation1);
-		conditions.put("passenger_count", operation2);
+		conditions.put(columnNames[0], operation1);
+		conditions.put(columnNames[3], operation2);
 
-		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "OR");
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, OR);
 
 		// WHEN
 		JsonObject result;
@@ -169,15 +177,15 @@ class IndexingEngineTest {
 	void should_throw_no_data_exception_simple_query() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
-		cols.add("VendorID");
+		cols.add(columnNames[0]);
 
 		Map<String, Map<String, Object>> conditions = new HashMap<>();
 		Map<String, Object> operation = new HashMap<>();
 		operation.put("operator", "=");
 		operation.put("value", 5);
-		conditions.put("VendorID", operation);
+		conditions.put(columnNames[0], operation);
 
-		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "AND");
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, AND);
 
 		// WHEN, THEN
 		assertThrows(NoDataException.class, () -> {
@@ -189,8 +197,8 @@ class IndexingEngineTest {
 	void should_throw_no_data_exception_multiple_AND_query() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
-		cols.add("VendorID");
-		cols.add("passenger_count");
+		cols.add(columnNames[0]);
+		cols.add(columnNames[3]);
 
 		Map<String, Map<String, Object>> conditions = new HashMap<>();
 
@@ -204,10 +212,10 @@ class IndexingEngineTest {
 		operation2.put("operator", "=");
 		operation2.put("value", 2);
 
-		conditions.put("VendorID", operation1);
-		conditions.put("passenger_count", operation2);
+		conditions.put(columnNames[0], operation1);
+		conditions.put(columnNames[3], operation2);
 
-		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "AND");
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, AND);
 
 		// WHEN, THEN
 		final JsonObject[] result = new JsonObject[1];
@@ -220,8 +228,8 @@ class IndexingEngineTest {
 	void should_throw_no_data_exception_multiple_OR_query() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
-		cols.add("VendorID");
-		cols.add("passenger_count");
+		cols.add(columnNames[0]);
+		cols.add(columnNames[3]);
 
 		Map<String, Map<String, Object>> conditions = new HashMap<>();
 
@@ -235,10 +243,10 @@ class IndexingEngineTest {
 		operation2.put("operator", "=");
 		operation2.put("value", 6);
 
-		conditions.put("VendorID", operation1);
-		conditions.put("passenger_count", operation2);
+		conditions.put(columnNames[0], operation1);
+		conditions.put(columnNames[3], operation2);
 
-		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, "OR");
+		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, OR);
 
 		// WHEN, THEN
 		final JsonObject[] result = new JsonObject[1];
