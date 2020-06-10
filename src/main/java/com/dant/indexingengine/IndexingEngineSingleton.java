@@ -1,6 +1,7 @@
 package com.dant.indexingengine;
 
 import com.dant.exception.NonIndexedColumn;
+import com.dant.indexingengine.columns.Column;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 

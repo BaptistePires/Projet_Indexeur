@@ -1,6 +1,9 @@
 package com.dant.indexingengine;
 
 import com.dant.exception.UnsupportedTypeException;
+import com.dant.indexingengine.columns.DoubleColumn;
+import com.dant.indexingengine.columns.IntegerColumn;
+import com.dant.indexingengine.columns.StringColumn;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import org.junit.jupiter.api.BeforeAll;

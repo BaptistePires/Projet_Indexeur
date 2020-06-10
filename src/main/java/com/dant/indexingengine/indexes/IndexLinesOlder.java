@@ -1,48 +1,22 @@
-package com.dant.indexingengine;
+package com.dant.indexingengine.indexes;
+
+import com.dant.indexingengine.IndexingEngineSingleton;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-public class SimpleIndex {
-
-    private String colName;
-    private final HashMap<Object, IndexHolder> indexedData;
-
-    public SimpleIndex() {
-        indexedData = new HashMap<>();
-    }
-
-    public void index(Object o, int noLine) throws IOException {
-        indexedData.computeIfAbsent(o, k -> {
-            try {
-                return new IndexHolder();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                return null;
-            }
-        });
-        indexedData.get(o).addLine(noLine);
-    }
-
-    public List<Integer> get(Object o, int limit) throws IOException {
-        return indexedData.containsKey(o) ? indexedData.get(o).getNumberOfLines(limit) : new ArrayList<>();
-    }
-}
-
-class IndexHolder {
+class IndexLinesOlder {
 
     private final ArrayList<Integer> linesNumberBuffer;
     private final RandomAccessFile saveFile;
     public int totalLinesInserted;
     public final int MAX_BUFFERED_LINES = 10000;
-    public final int BYTE_INT_SIZE = 4;
 
 
-    IndexHolder() throws FileNotFoundException {
+    IndexLinesOlder() throws FileNotFoundException {
         linesNumberBuffer = new ArrayList<>();
         saveFile = new RandomAccessFile(IndexingEngineSingleton.getInstance().getNewFilePath(), "rw");
         totalLinesInserted = 0;

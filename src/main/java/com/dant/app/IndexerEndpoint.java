@@ -2,9 +2,12 @@ package com.dant.app;
 
 import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
-import com.dant.exception.NoDataException;
 import com.dant.exception.UnsupportedTypeException;
 import com.dant.indexingengine.*;
+import com.dant.indexingengine.columns.Column;
+import com.dant.indexingengine.columns.DoubleColumn;
+import com.dant.indexingengine.columns.IntegerColumn;
+import com.dant.indexingengine.columns.StringColumn;
 import com.dant.utils.IndexerUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
