@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 // TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
 // Will work with only one index currently
@@ -124,25 +125,35 @@ public class IndexingEngineSingleton {
         Table t = getTableByName(q.from);
 
         ArrayList<Integer> resultLineNos = new ArrayList<>();
-        ArrayList<Integer> filtersIntersect;
+        ArrayList<Integer> otherFilter;
 
         ArrayList<Object[]> returnedLines = new ArrayList<>();
         ArrayList<Map.Entry<String, Map<String, Object>>> nonIndexedColsConditions = new ArrayList<>();
         int nbCond = 0;
         // Iterate through conditions
-        for (Map.Entry<String, Map<String, Object>> entry : q.conditions.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> entry : q.where.entrySet()) {
             try {
                 if (entry.getValue().get("operator").equals("=")) {
-                    filtersIntersect = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
-                    if (resultLineNos.isEmpty()) resultLineNos = filtersIntersect;
-                    else resultLineNos.retainAll(filtersIntersect); // Intersect
+                    otherFilter = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
+                    if (resultLineNos.isEmpty()) resultLineNos = otherFilter;
+                    else {
+                        if (q.operator.equalsIgnoreCase("and"))
+                            resultLineNos.retainAll(otherFilter); // Intersect
+                        if (q.operator.equalsIgnoreCase("or")) {
+                            resultLineNos = (ArrayList<Integer>)
+                                    Stream.concat(resultLineNos.stream(), otherFilter.stream())
+                                            .distinct()
+                                            .collect(Collectors.toList());
+                            Collections.sort(resultLineNos);
+                        }
+                    }
                     nbCond++;
                 }
             } catch (NonIndexedColumn e) {
                 nonIndexedColsConditions.add(entry);
             }
             // Don't stop before processing all conditions, truncate if necessary
-            if (nbCond == q.conditions.entrySet().size() && (resultLineNos.size() >= q.limit))
+            if (nbCond == q.where.entrySet().size() && (resultLineNos.size() >= q.limit))
                 resultLineNos = (ArrayList<Integer>) resultLineNos.stream()
                         .limit(q.limit)
                         .collect(Collectors.toList());
