@@ -1,4 +1,4 @@
-package com.dant.indexingengine;
+package com.dant.indexingengine.columns;
 
 import com.dant.exception.UnsupportedTypeException;
 

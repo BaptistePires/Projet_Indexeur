@@ -1,6 +1,9 @@
 package com.dant.indexingengine;
 
 import com.dant.exception.UnsupportedTypeException;
+import com.dant.indexingengine.columns.DoubleColumn;
+import com.dant.indexingengine.columns.IntegerColumn;
+import com.dant.indexingengine.columns.StringColumn;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import org.junit.jupiter.api.BeforeAll;
@@ -20,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class FileManagerTest {
 
 	private static final String TEST_FILE_LOCATION
-			= Paths.get(".", "src", "main", "resources", "csv", "unit_tests.csv").toString();
+			= Paths.get(".", "src", "main", "resources", "uploads", "unit_tests.csv").toString();
 
 	private static final String TABLE_NAME = "nyc_cab";
 

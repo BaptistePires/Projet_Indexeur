@@ -1,5 +1,6 @@
 package com.dant.indexingengine;
 
+import com.dant.indexingengine.columns.Column;
 import org.apache.commons.lang3.SerializationUtils;
 
 import java.io.FileNotFoundException;
