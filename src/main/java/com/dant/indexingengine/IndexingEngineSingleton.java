@@ -1,6 +1,7 @@
 package com.dant.indexingengine;
 
 import com.dant.exception.NoDataException;
+import com.dant.exception.TableNotFoundException;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 
@@ -52,7 +53,7 @@ public class IndexingEngineSingleton {
      * @param fileName path to .csv file;
      * @throws {@link IOException}
      */
-    public void startIndexing(String fileName, String tableName) throws IOException {
+    public void startIndexing(String fileName, String tableName) throws IOException, TableNotFoundException {
         // Files related vars
 //        String fileName = "src/main/resources/csv/test.csv";
         //String fileName = "src/main/resources/csv/yellow_tripdata_2019-01.csv";
@@ -70,8 +71,7 @@ public class IndexingEngineSingleton {
         int i, headerLength;
 
         Table t;
-        //TODO : Exception table does not exist
-        if ((t = getTableByName(tableName)) == null) return;
+        if ((t = getTableByName(tableName)) == null) throw new TableNotFoundException();
         ArrayList<Column> indexedColumns = t.getIndexedColumns();
 
 
