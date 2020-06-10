@@ -8,6 +8,7 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 // TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
 // Will work with only one index currently
@@ -123,25 +124,39 @@ public class IndexingEngineSingleton {
         ArrayList<Column> selectedCols;
         Table t = getTableByName(q.from);
 
-        ArrayList<Integer> linesNumber = new ArrayList<>();
+        ArrayList<Integer> resultLineNos = new ArrayList<>();
+        ArrayList<Integer> filtersIntersect;
+
         ArrayList<Object[]> returnedLines = new ArrayList<>();
         ArrayList<Map.Entry<String, Map<String, Object>>> nonIndexedColsConditions = new ArrayList<>();
+        int nbCond = 0;
         // Iterate through conditions
         for (Map.Entry<String, Map<String, Object>> entry : q.conditions.entrySet()) {
             try {
                 if (entry.getValue().get("operator").equals("=")) {
-                    linesNumber = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
+                    filtersIntersect = t.getColumnByName(entry.getKey()).getLinesForIndex(entry.getValue().get("value"), q.limit);
+                    if (resultLineNos.isEmpty()) resultLineNos = filtersIntersect;
+                    else {  // Intersect
+                        resultLineNos = (ArrayList<Integer>) resultLineNos.stream()
+                                .filter(filtersIntersect::contains)
+                                .collect(Collectors.toList());
+                    }
+                    nbCond++;
                 }
             } catch (NonIndexedColumn e) {
                 nonIndexedColsConditions.add(entry);
             }
-            if (linesNumber.size() >= q.limit) break;
+            // Don't stop before processing all conditions, truncate if necessary
+            if (nbCond == q.conditions.entrySet().size() && (resultLineNos.size() >= q.limit))
+                resultLineNos = (ArrayList<Integer>) resultLineNos.stream()
+                        .limit(q.limit)
+                        .collect(Collectors.toList());
         }
 
         // Handle non indexed cols
         int testedLines = 0;
         Object lineValue;
-        while (linesNumber.size() + returnedLines.size() < q.limit) {
+        while (resultLineNos.size() + returnedLines.size() < q.limit) {
             try {
                 for (Object[] o : fm.getLinesInterval(testedLines, testedLines + 1000, t.getColumns(), t.getColumns())) {
                     for (Map.Entry<String, Map<String, Object>> e : nonIndexedColsConditions) {
@@ -163,8 +178,8 @@ public class IndexingEngineSingleton {
         if (q.cols.get(0).equals("*")) selectedCols = t.getColumns();
         else selectedCols = t.getColumnsByNames(q.cols);
 
-        if (!linesNumber.isEmpty()) {
-            returnedLines.addAll(fm.getLines(linesNumber, t.getColumns(), selectedCols));
+        if (!resultLineNos.isEmpty()) {
+            returnedLines.addAll(fm.getLines(resultLineNos, t.getColumns(), selectedCols));
         }
         return new ArrayList<>(returnedLines.subList(0, Math.min(q.limit, returnedLines.size())));
     }
