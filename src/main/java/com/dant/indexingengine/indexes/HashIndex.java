@@ -24,9 +24,7 @@ public class HashIndex extends BasicIndex {
             try {
                 return new IndexLinesHolder();
             } catch (FileNotFoundException e) {
-                // TODO : Exception
-                e.printStackTrace();
-                return null;
+                throw new RuntimeException("[HashIndex - indexObject] Can't create file");
             }
         });
         indexedLines.get(o).addLine(noLine);
