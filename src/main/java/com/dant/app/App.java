@@ -2,15 +2,16 @@ package com.dant.app;
 
 import com.dant.exception.*;
 import com.dant.filter.GsonProvider;
-import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 import java.util.HashSet;
 import java.util.Set;
+
+import io.swagger.v3.jaxrs2.integration.resources.AcceptHeaderOpenApiResource;
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by pitton on 2017-02-20.
@@ -33,6 +34,8 @@ public class App extends Application {
         sets.add(InvalidIndexException.class);
         sets.add(InvalidIndexExceptionMapper.class);
         sets.add(UnsupportedTypeExceptionMapper.class);
+        sets.add(WrongFileFormatExceptionMapper.class);
+        sets.add(TableNotFoundExceptionMapper.class);
         sets.add(InvalidFileException.class);
         sets.add(InvalidFileExceptionMapper.class);
         sets.add(NoDataException.class);
@@ -43,4 +46,6 @@ public class App extends Application {
         sets.add(LoggerFactory.class);
         return sets;
     }
+
+
 }

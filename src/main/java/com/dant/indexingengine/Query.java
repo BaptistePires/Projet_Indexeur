@@ -14,21 +14,25 @@ public class Query {
     List<String> cols;
 
     @Expose
-    Map<String, Map<String, Object>> conditions;
+    Map<String, Map<String, Object>> where;
 
     @Expose
     int limit;
 
     @Expose
-    String table;
+    String from;
+
+    @Expose
+    String operator;
 
 
-    public Query(String type, List<String> cols, Map<String, Map<String, Object>> conditions, int limit, String table) {
+    public Query(String type, List<String> cols, Map<String, Map<String, Object>> where, int limit, String from, String operator) {
         this.type = type;
         this.cols = cols;
-        this.conditions = conditions;
+        this.where = where;
         this.limit = limit;
-        this.table = table;
+        this.from = from;
+        this.operator = operator;
     }
 
     public String getType() {
@@ -47,12 +51,12 @@ public class Query {
         this.cols = cols;
     }
 
-    public Map<String, Map<String, Object>> getConditions() {
-        return conditions;
+    public Map<String, Map<String, Object>> getWhere() {
+        return where;
     }
 
-    public void setConditions(Map<String, Map<String, Object>> conditions) {
-        this.conditions = conditions;
+    public void setWhere(Map<String, Map<String, Object>> where) {
+        this.where = where;
     }
 
     @Override
@@ -61,8 +65,10 @@ public class Query {
         sb.append("Query \n ------- ");
         sb.append("Type    : ").append(type).append("\n");
         sb.append("Columns : ").append(cols).append("\n");
+        sb.append("Limit    : ").append(limit).append("\n");
+        sb.append("Table    : ").append(from).append("\n");
         sb.append("Conditions : ").append("\n");
-        for (Map.Entry<String, Map<String, Object>> e : conditions.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> e : where.entrySet()) {
             sb.append("\t").append(e.getKey()).append("\n");
             for (Map.Entry<String, Object> subEntry : e.getValue().entrySet()) {
                 sb.append("\t\t").append(subEntry.getKey()).append(" : ").append(subEntry.getValue()).append("\n");
