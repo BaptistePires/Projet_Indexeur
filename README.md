@@ -8,8 +8,10 @@ Supervised by [Olivier PITTON](https://www.linkedin.com/in/olivier-pitton-426049
 * [Massil TAGUEMOUT](mailto:massitaguemout@gmail.com)
 * [Baptiste PIRES](mailto:baptiste.pires37@gmail.com)
 
+## Getting Started
+* To run the project, execute `mvn jetty:run-war`
 
 ## Documentation
 * Swagger API Documentation: http://localhost:8080/
 * OpenAPI Specification: http://localhost:8080/api/openapi.json
-* Project Reports: Execute `mvn site`. The resulting reports will be generated in `target/site/...` 
+* Project Information and Reports: Execute `mvn site` in a separate terminal. The reports will be generated and visible at http://localhost:9000/
