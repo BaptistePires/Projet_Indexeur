@@ -248,6 +248,7 @@ public class IndexingEngineSingleton {
     }
 
 
+
     public ArrayList<Table> getTables() {
         return tables;
     }
