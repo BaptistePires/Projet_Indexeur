@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class HashIndex extends BasicIndex {
 
-    private HashMap<Object, IndexLinesHolder> indexedLines;
+    private final HashMap<Object, IndexLinesHolder> indexedLines;
 
     public HashIndex() {
         indexedLines = new HashMap<>();
@@ -41,5 +41,10 @@ public class HashIndex extends BasicIndex {
     @Override
     public List<Integer> findLinesForObjectSuperior(Object o, int limit) throws IOException {
         return null;
+    }
+
+    @Override
+    public int size() {
+        return indexedLines.size();
     }
 }

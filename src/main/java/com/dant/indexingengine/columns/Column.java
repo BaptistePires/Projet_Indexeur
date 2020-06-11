@@ -34,6 +34,12 @@ public abstract class Column implements Serializable {
         index = null;
     }
 
+    public BasicIndex getIndex() {
+        return index;
+    }
+
+
+
     public void setColumnNo(int columnNo) {
         this.columnNo = columnNo;
     }

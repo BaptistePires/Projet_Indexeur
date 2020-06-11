@@ -11,4 +11,6 @@ public abstract class BasicIndex {
     public abstract List<Integer> findLinesForObjectEquals(Object o, int limit) throws IOException;
 
     public abstract List<Integer> findLinesForObjectSuperior(Object o, int limit) throws IOException;
+
+    public abstract int size();
 }

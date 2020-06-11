@@ -14,7 +14,7 @@ import java.util.List;
 
 public class NumberIndex extends BasicIndex {
 
-    private ArrayList<IndexContainer> indexedLines;
+    private final ArrayList<IndexContainer> indexedLines;
     private boolean sorted;
     Comparator<IndexContainer> comparator;
 
@@ -72,6 +72,11 @@ public class NumberIndex extends BasicIndex {
     @Override
     public List<Integer> findLinesForObjectSuperior(Object o, int limit) throws IOException {
         return null;
+    }
+
+    @Override
+    public int size() {
+        return indexedLines.size();
     }
 
     private Comparator<IndexContainer> getComparator(Column c) throws UnsupportedTypeException {

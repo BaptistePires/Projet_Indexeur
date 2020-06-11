@@ -18,7 +18,7 @@ public class FileManager {
     private final RandomAccessFile dataSavedToDisk;
     private final RandomAccessFile linesPositionsInFile;
     private final int BYTE_SIZE_LONG_ARRAY = 43;
-    private ArrayList<Object[]> lines;
+    private final ArrayList<Object[]> lines;
     private final int MAX_LINE_BUFFERED = 8000000;
 
     public FileManager() throws FileNotFoundException {

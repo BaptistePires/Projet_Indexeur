@@ -58,64 +58,89 @@ public class IndexingEngineSingleton {
     public void startIndexing(String fileName, String tableName) throws IOException {
 
         // Files related vars
-        FileInputStream fis = new FileInputStream(fileName);
-        InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
-        CSVReader reader = new CSVReader(isr);
-
-        String outputFilePath = Paths.get("src", "main", "resources", "tmp", "DataOutputFiles").toString();
-        DataOutputStream out = new DataOutputStream((new BufferedOutputStream(new FileOutputStream(outputFilePath))));
+        FileInputStream fis;
+        InputStreamReader isr;
+        CSVReader reader;
 
         // Reading CSV vars
         String[] lineArray;
+        String[] header = new String[0];
         Object[] castedLine;
         int i, headerLength;
+        boolean isFirst = true;
 
         Table t;
         //TODO : Exception table does not exist
         if ((t = getTableByName(tableName)) == null) return;
         ArrayList<Column> indexedColumns = t.getIndexedColumns();
 
+        // go through upload folder
+        File uploadFolder = Paths.get("src", "main", "resources", "uploads").toFile();
+        for (String file : Objects.requireNonNull(uploadFolder.list())) {
+            if (file.contains("test")) continue;
+            System.out.println("[IndexingEngineSingleton - StartIndexing] - Indexing file : " + file);
 
-        try {
-            lineArray = reader.readNext();
-            headerLength = lineArray.length;
-            if (lineArray.length != getTableByName(tableName).getColumns().size()) {
-                System.out.println("Error, the file provided does not correspond to the table;");
-                return;
-            }
+            fis = new FileInputStream(Paths.get("src", "main", "resources", "uploads", file).toFile());
+            isr = new InputStreamReader(fis, StandardCharsets.UTF_8);
+            reader = new CSVReader(isr);
 
-            // Setting up columns No
-            for (i = 0; i < headerLength; i++) {
-                t.getColumnByName(lineArray[i]).setColumnNo(i);
-            }
-
-            t.sortColumnsByNo();
-            long noLine = 0;
-            while ((lineArray = reader.readNext()) != null) {
-                // Cast data
-                castedLine = new Object[headerLength];
-                for (i = 0; i < headerLength; i++) {
-                    castedLine[i] = t.getColumns().get(i).castAndUpdateMetaData(lineArray[i]);
+            try {
+                lineArray = reader.readNext();
+                headerLength = lineArray.length;
+                if (lineArray.length != getTableByName(tableName).getColumns().size()) {
+                    System.out.println("Error, the file provided does not correspond to the table; fileName : " + file);
+                    return;
                 }
-                // Write line on disk
-                noLine = fm.writeLine(castedLine, t.getColumns());
+                // Check headers
+                if (isFirst) {
+                    header = lineArray;
+                    // Setting up columns No
+                    for (i = 0; i < headerLength; i++) {
+                        t.getColumnByName(lineArray[i]).setColumnNo(i);
+                    }
+                    isFirst = false;
+                } else {
+                    if (!Arrays.equals(header, lineArray)) {
+                        // TODO : Exception
+                        System.out.println("File :" + file + " does not correspond to others files.");
+                        return;
+                    }
+                }
 
-                // Update indexes
-                for (Column c : indexedColumns) {
+
+                t.sortColumnsByNo();
+                long noLine = 0;
+                while ((lineArray = reader.readNext()) != null) {
+                    // Cast data
+                    castedLine = new Object[headerLength];
+                    for (i = 0; i < headerLength; i++) {
+                        castedLine[i] = t.getColumns().get(i).castAndUpdateMetaData(lineArray[i]);
+                    }
+                    // Write line on disk
+                    noLine = fm.writeLine(castedLine, t.getColumns());
+
+                    // Update indexes
+                    for (Column c : indexedColumns) {
 //                    castedLine[c.getColumnNo()] = c.castAndUpdateMetaData(lineArray[c.getColumnNo()]);
-                    c.index(castedLine[c.getColumnNo()], (int) noLine);
+                        c.index(castedLine[c.getColumnNo()], (int) noLine);
+                    }
                 }
-            }
 
-        } catch (CsvValidationException e) {
-            e.printStackTrace();
-            System.out.println("bizarre bizarre");
-        } catch (Exception e) {
-            // ->>> t.mapColumnByNo; handle exception better
-            System.out.println("herre");
-            e.printStackTrace();
+            } catch (CsvValidationException e) {
+                e.printStackTrace();
+                System.out.println("bizarre bizarre");
+            } catch (Exception e) {
+                // ->>> t.mapColumnByNo; handle exception better
+                System.out.println("herre");
+                e.printStackTrace();
+            }
         }
 
+        int indexSum = 0;
+        for (Column c : t.getColumns()) {
+            if (c.isIndexed()) indexSum += c.getIndex().size();
+        }
+        System.out.println("[IndexingEngineSingleton - StartIndexing] - Indexing ended, created :" + indexSum + "indexes");
     }
 
 
@@ -160,7 +185,7 @@ public class IndexingEngineSingleton {
         }
 
         // Handle non indexed cols
-        if(nonIndexedColsConditions.size()>0){
+        if (nonIndexedColsConditions.size() > 0) {
             if (q.operator.equalsIgnoreCase("or")) {
                 resultLineNos = handleOrQueriesNonIndexedCols(t, q, resultLineNos, nonIndexedColsConditions);
             } else {
@@ -246,7 +271,6 @@ public class IndexingEngineSingleton {
         return indexedLinesNos;
 
     }
-
 
 
     public ArrayList<Table> getTables() {
