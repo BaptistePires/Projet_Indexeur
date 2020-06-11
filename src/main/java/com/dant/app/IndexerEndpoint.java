@@ -1,9 +1,6 @@
 package com.dant.app;
 
-import com.dant.exception.InvalidFileException;
-import com.dant.exception.InvalidIndexException;
-import com.dant.exception.TableNotFoundException;
-import com.dant.exception.UnsupportedTypeException;
+import com.dant.exception.*;
 import com.dant.indexingengine.IndexingEngineSingleton;
 import com.dant.indexingengine.Query;
 import com.dant.indexingengine.QueryHandler;
@@ -75,10 +72,6 @@ public class IndexerEndpoint {
                     c = new DoubleColumn(column.get("name").getAsString());
                     break;
 
-                case "string":
-                    c = new StringColumn(column.get("name").getAsString());
-                    break;
-
                 default:
                     c = new StringColumn(column.get("name").getAsString());
             }
@@ -87,7 +80,7 @@ public class IndexerEndpoint {
         indexingEngine.addTable(table);
         lastCreatedTableName = tableName;
 
-        return Response.status(201).entity("Table \"" + tableName + "\" has been created").build();
+        return Response.status(201).entity(table).build();
     }
 
 
@@ -106,26 +99,8 @@ public class IndexerEndpoint {
         for (JsonElement e : indexedColumn) {
             t.getColumnByName(e.getAsString()).setIndexed();
         }
-//		Column[] columns = new Column[indexedColumn.size()];
-//		for(int i = 0; i < indexedColumn.size(); i++) columns[i] = t.getColumnByName(indexedColumn.get(i).getAsString());
-//		t.addIndexByName(columns);
-        // Before inserting indexes, we must check data integrity
-//		if (indexesToAdd.size() > IndexingEngineSingleton.getInstance().getTable().getColumns().size())
-//			throw new InvalidIndexException("You provided more indexes" +
-//					"than there are columns.");
-//		List<String> allColumnsName = IndexingEngineSingleton.getInstance().getTable().getColumnsName();
-//		if (!allColumnsName.containsAll(indexesToAdd)) {
-//			List<String> invalidIndexes = new ArrayList<>();
-//			for (String s : indexesToAdd) {
-//				if (!allColumnsName.contains(s)) invalidIndexes.add(s);
-//			}
-//			throw new InvalidIndexException(invalidIndexes.toString());
-//		}
-//		// Add indexes
-//		for (String s : indexesToAdd) {
-////			IndexingEngineSingleton.getInstance().getTable().addIndexByName(s);
-//		}
-        return Response.status(201).build();
+
+        return Response.status(201).entity(t).build();
     }
 
 
@@ -167,8 +142,8 @@ public class IndexerEndpoint {
 
     @POST
     @Path("/startIndexing")
-    public Response startIndexing() throws IOException, TableNotFoundException {
-        indexingEngine.startIndexing(uploadedFilePath, lastCreatedTableName);
+    public Response startIndexing() throws IOException, TableNotFoundException, WrongFileFormatException {
+        indexingEngine.startIndexing(lastCreatedTableName);
         return Response.status(200).entity("Indexing started").build();
     }
 
@@ -196,7 +171,7 @@ public class IndexerEndpoint {
     @GZIP
     @Path("/query")
     public Response testQuery(Query q) throws Exception {
-        System.out.println("Received " + q.toString());
+        System.out.println("[INFO] Query received " + q.toString());
         return Response
                 .status(200)
                 .type(MediaType.APPLICATION_JSON_TYPE)

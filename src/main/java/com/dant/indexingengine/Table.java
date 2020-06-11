@@ -1,7 +1,6 @@
 package com.dant.indexingengine;
 
 import com.dant.indexingengine.columns.Column;
-import com.dant.indexingengine.indexes.BasicIndex;
 import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
@@ -26,12 +25,6 @@ public class Table implements Serializable {
 
     private final Map<Integer, Column> columnsMappedByNo;
 
-    /**
-     * indexes : Can be interpreted as a sub-set of columns, it contains references to columns
-     * that are used to index data.
-     */
-    @Expose
-    private final HashMap<Column[], BasicIndex> indexes;
 
     @Expose
     private String name;
@@ -44,7 +37,6 @@ public class Table implements Serializable {
         columns = new ArrayList<>();
         columnsMappedByName = new HashMap<>();
         columnsMappedByNo = new HashMap<>();
-        indexes = new HashMap<>();
         this.name = name;
     }
 
@@ -62,7 +54,6 @@ public class Table implements Serializable {
         // in each list
         columns.remove(col);
         columnsMappedByName.remove(col.getName());
-        indexes.remove(col);
     }
 
     public Column getColumnByName(String name) {
@@ -72,7 +63,7 @@ public class Table implements Serializable {
     public ArrayList<Column> getColumnsByNames(List<String> names) {
         return (ArrayList<Column>) names
                 .stream()
-                .map(o -> getColumnByName(o))
+                .map(this::getColumnByName)
                 .collect(Collectors.toList());
     }
 
@@ -99,27 +90,8 @@ public class Table implements Serializable {
         this.name = name;
     }
 
-    /**
-     * This method must be called once you set up ALL of the columns numbers.
-     */
-    public void mapColumnsByNo() throws Exception {
-        int number;
-        for (Column c : columns) {
-            number = c.getColumnNo();
-            if (number == Column.UNDEFINED_NO) {
-                String s = "Column : " + c.getName() + " has no column number";
-                throw new Exception(s);
-            }
-            columnsMappedByNo.put(c.getColumnNo(), c);
-        }
-    }
-
     public void sortColumnsByNo() {
         columns.sort(Comparator.comparing(Column::getColumnNo));
-    }
-
-    public HashMap<Column[], BasicIndex> getIndexes() {
-        return indexes;
     }
 
     public ArrayList<Column> getIndexedColumns() {

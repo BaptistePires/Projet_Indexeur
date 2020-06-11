@@ -3,6 +3,7 @@ package com.dant.indexingengine;
 import com.dant.exception.NoDataException;
 import com.dant.exception.TableNotFoundException;
 import com.dant.exception.UnsupportedTypeException;
+import com.dant.exception.WrongFileFormatException;
 import com.dant.indexingengine.columns.DoubleColumn;
 import com.dant.indexingengine.columns.IntegerColumn;
 import com.dant.indexingengine.columns.StringColumn;
@@ -42,7 +43,7 @@ class IndexingEngineTest {
 	private static final String OR = "OR";
 
 	@BeforeAll
-	static void setUp() throws UnsupportedTypeException, TableNotFoundException, IOException {
+	static void setUp() throws UnsupportedTypeException, TableNotFoundException, IOException, WrongFileFormatException {
 		Table table = new Table(TABLE_NAME);
 
 		table.addColumn(new IntegerColumn(columnNames[0]));
@@ -69,7 +70,7 @@ class IndexingEngineTest {
 		indexingEngineSingleton.getTableByName(TABLE_NAME).getColumnByName(INDEXED_COL_NAME_1).setIndexed();
 		indexingEngineSingleton.getTableByName(TABLE_NAME).getColumnByName(INDEXED_COL_NAME_2).setIndexed();
 
-		indexingEngineSingleton.startIndexing(TEST_FILE_LOCATION, TABLE_NAME);
+		indexingEngineSingleton.startIndexing(TABLE_NAME);
 	}
 
 	@Test

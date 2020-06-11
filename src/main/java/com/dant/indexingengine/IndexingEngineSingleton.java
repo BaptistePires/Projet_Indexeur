@@ -43,10 +43,9 @@ public class IndexingEngineSingleton {
     /**
      * Indexes the file and keeps line offsets for future queries
      *
-     * @param fileName path to .csv file;
      * @throws {@link IOException}
      */
-    public void startIndexing(String fileName, String tableName) throws IOException, TableNotFoundException {
+    public void startIndexing(String tableName) throws IOException, TableNotFoundException, WrongFileFormatException {
 
         // Files related vars
         FileInputStream fis;
@@ -117,12 +116,7 @@ public class IndexingEngineSingleton {
                 }
 
             } catch (CsvValidationException e) {
-                e.printStackTrace();
-                System.out.println("bizarre bizarre");
-            } catch (Exception e) {
-                // ->>> t.mapColumnByNo; handle exception better
-                System.out.println("herre");
-                e.printStackTrace();
+                throw new RuntimeException("[IndexingEngineException - StartIndexing] Error with the CSV file : " + file);
             }
         }
 
@@ -130,7 +124,7 @@ public class IndexingEngineSingleton {
         for (Column c : t.getColumns()) {
             if (c.isIndexed()) indexSum += c.getIndex().size();
         }
-        System.out.println("[IndexingEngineSingleton - StartIndexing] - Indexing ended, created :" + indexSum + "indexes");
+        System.out.println("[IndexingEngineSingleton - StartIndexing] - Indexing ended, created :" + indexSum + " indexes.");
     }
 
 
