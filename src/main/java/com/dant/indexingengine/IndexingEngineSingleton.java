@@ -18,20 +18,32 @@ public class IndexingEngineSingleton {
     private static final IndexingEngineSingleton INSTANCE;
 
     static {
-        INSTANCE = new IndexingEngineSingleton();
-
+        // Cleaning up and creating folders if needed
         File tmpFolder = Paths.get("src", "main", "resources", "tmp").toFile();
-        for(String file: Objects.requireNonNull(tmpFolder.list())) {
-            File f = Paths.get("src", "main", "resources", "tmp", file).toFile();
-            f.delete();
+
+        if(!tmpFolder.exists()){
+            tmpFolder.mkdirs();
+        }else{
+            for(String file: Objects.requireNonNull(tmpFolder.list())) {
+                System.out.println(file);
+                File f = Paths.get("src", "main", "resources", "tmp", file).toFile();
+                f.delete();
+            }
         }
 
         File uploadsFolder = Paths.get("src", "main", "resources", "uploads").toFile();
-        for(String file: Objects.requireNonNull(uploadsFolder.list())) {
-            if(file.equalsIgnoreCase("unit_test.csv")) continue;
-            File f = Paths.get("src", "main", "resources", "uploads", file).toFile();
-            f.delete();
+        if(!uploadsFolder.exists()){
+            uploadsFolder.mkdirs();
+        }else{
+            for(String file: Objects.requireNonNull(uploadsFolder.list())) {
+                System.out.println(file);
+                if(file.equalsIgnoreCase("unit_test.csv")) continue;
+                File f = Paths.get("src", "main", "resources", "uploads", file).toFile();
+                f.delete();
+            }
         }
+
+        INSTANCE = new IndexingEngineSingleton();
     }
 
     private final ArrayList<Table> tables;
