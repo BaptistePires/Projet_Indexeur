@@ -84,9 +84,5 @@ Thumbs.db
 /src/main/resources/uploads/linesPos.bin
 /src/main/resources/uploads/saved.bin
 /src/main/resources/uploads/DataOutputFile.bin
+/src/main/resources/uploads/*.csv
 /src/main/resources/tmp/*
-
-# Except
-!src/main/resources/uploads/test.csv
-!src/main/resources/uploads/unit_tests.csv
-!/src/main/resources/tmp/*.txt
