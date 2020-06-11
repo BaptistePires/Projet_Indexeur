@@ -2,6 +2,7 @@ package com.dant.app;
 
 import com.dant.exception.InvalidFileException;
 import com.dant.exception.InvalidIndexException;
+import com.dant.exception.TableNotFoundException;
 import com.dant.exception.UnsupportedTypeException;
 import com.dant.indexingengine.IndexingEngineSingleton;
 import com.dant.indexingengine.Query;
@@ -166,27 +167,7 @@ public class IndexerEndpoint {
 
     @POST
     @Path("/startIndexing")
-    public Response startIndexing() throws IOException {
-//		if (!indexingEngine.canIndex()) {
-//			return Response.status(403).entity("IndexingEngine is not ready to process your data").build();
-//		}
-//
-//		Thread t = new Thread() {
-//
-//			@SneakyThrows
-//			@Override
-//			public void run() {
-//				super.run();
-//				log.info("Indexing started at "
-//						+ DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").format(LocalDateTime.now())
-//				);
-//				indexingEngine.startIndexing(uploadedFilePath);
-//				log.info("Finished indexing file at "
-//						+ DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss").format(LocalDateTime.now())
-//				);
-//			}
-//		};
-//		t.start();
+    public Response startIndexing() throws IOException, TableNotFoundException {
         indexingEngine.startIndexing(uploadedFilePath, lastCreatedTableName);
         return Response.status(200).entity("Indexing started").build();
     }
@@ -209,7 +190,7 @@ public class IndexerEndpoint {
      *          <p>
      *          Currently only support one index, need improvements.
      *          There is no columns selection too. All columns will be returned
-     *          as String. TODO: fix type issue.
+     *          as String.
      */
     @POST
     @GZIP

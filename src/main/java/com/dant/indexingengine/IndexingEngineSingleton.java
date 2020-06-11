@@ -2,6 +2,7 @@ package com.dant.indexingengine;
 
 import com.dant.exception.NonIndexedColumn;
 import com.dant.exception.TableNotFoundException;
+import com.dant.exception.WrongFileFormatException;
 import com.dant.indexingengine.columns.Column;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
@@ -92,9 +93,7 @@ public class IndexingEngineSingleton {
                     isFirst = false;
                 } else {
                     if (!Arrays.equals(header, lineArray)) {
-                        // TODO : Exception
-                        System.out.println("File :" + file + " does not correspond to others files.");
-                        return;
+                        throw new WrongFileFormatException("File " + file + " has not the right header");
                     }
                 }
 
@@ -135,7 +134,7 @@ public class IndexingEngineSingleton {
     }
 
 
-    public ArrayList<Object[]> handleQuery(Query q) throws Exception { // TODO : handle exception
+    public ArrayList<Object[]> handleQuery(Query q)  {
         ArrayList<Column> selectedCols;
         Table t = getTableByName(q.from);
 
@@ -166,6 +165,9 @@ public class IndexingEngineSingleton {
                 }
             } catch (NonIndexedColumn e) {
                 nonIndexedColsConditions.add(entry);
+            }catch (IOException e){
+                e.printStackTrace();
+                throw new RuntimeException(e.getMessage());
             }
             // Don't stop before processing all conditions, truncate if necessary
             if (nbCond == q.where.entrySet().size() && (resultLineNos.size() >= q.limit))
