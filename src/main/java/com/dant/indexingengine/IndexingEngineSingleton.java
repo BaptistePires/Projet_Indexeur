@@ -160,11 +160,14 @@ public class IndexingEngineSingleton {
         }
 
         // Handle non indexed cols
-        if (q.operator.equalsIgnoreCase("or")) {
-            resultLineNos = handleOrQueriesNonIndexedCols(t, q, resultLineNos, nonIndexedColsConditions);
-        } else {
-            resultLineNos = handleANDQueriesNonIndexedCols(t, q, resultLineNos, nonIndexedColsConditions);
+        if(nonIndexedColsConditions.size()>0){
+            if (q.operator.equalsIgnoreCase("or")) {
+                resultLineNos = handleOrQueriesNonIndexedCols(t, q, resultLineNos, nonIndexedColsConditions);
+            } else {
+                resultLineNos = handleANDQueriesNonIndexedCols(t, q, resultLineNos, nonIndexedColsConditions);
+            }
         }
+
 
         // Used to filter response
         if (q.cols.get(0).equals("*")) selectedCols = t.getColumns();
