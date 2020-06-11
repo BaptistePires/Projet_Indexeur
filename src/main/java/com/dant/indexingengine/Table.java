@@ -91,12 +91,12 @@ public class Table implements Serializable {
         return columns.get(no);
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**

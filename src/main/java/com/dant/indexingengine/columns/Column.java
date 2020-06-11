@@ -20,12 +20,11 @@ public abstract class Column implements Serializable {
 
     @Expose
     private final String name;
+    protected BasicIndex index;
     @Expose
     private int columnNo;
     @Expose
     private boolean isIndexed;
-
-    protected BasicIndex index;
 
     public Column(String name) throws UnsupportedTypeException {
         this.name = name;
@@ -38,18 +37,16 @@ public abstract class Column implements Serializable {
         return index;
     }
 
-
-
-    public void setColumnNo(int columnNo) {
-        this.columnNo = columnNo;
-    }
-
     public String getName() {
         return name;
     }
 
     public int getColumnNo() {
         return columnNo;
+    }
+
+    public void setColumnNo(int columnNo) {
+        this.columnNo = columnNo;
     }
 
     public abstract Object castAndUpdateMetaData(String o);

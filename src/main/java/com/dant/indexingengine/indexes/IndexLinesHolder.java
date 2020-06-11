@@ -10,10 +10,10 @@ import java.util.List;
 
 class IndexLinesHolder {
 
+    public final int MAX_BUFFERED_LINES = 10000;
     private final ArrayList<Integer> linesNumberBuffer;
     private final RandomAccessFile saveFile;
     public int totalLinesInserted;
-    public final int MAX_BUFFERED_LINES = 10000;
 
 
     IndexLinesHolder() throws FileNotFoundException {
@@ -23,7 +23,6 @@ class IndexLinesHolder {
     }
 
     public void addLine(int noLine) throws IOException {
-        //TODO : exception
         if (linesNumberBuffer.size() < MAX_BUFFERED_LINES) {
             linesNumberBuffer.add(noLine);
         } else {
@@ -34,7 +33,6 @@ class IndexLinesHolder {
     }
 
     public List<Integer> getNumberOfLines(int lineCount) throws IOException {
-        // TODO : exception
         if (lineCount <= linesNumberBuffer.size()) {
             return linesNumberBuffer.subList(0, lineCount);
         }

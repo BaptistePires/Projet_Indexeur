@@ -15,8 +15,8 @@ import java.util.List;
 public class NumberIndex extends BasicIndex {
 
     private final ArrayList<IndexContainer> indexedLines;
-    private boolean sorted;
     Comparator<IndexContainer> comparator;
+    private boolean sorted;
 
     public NumberIndex(Column c) throws UnsupportedTypeException {
         indexedLines = new ArrayList<>();

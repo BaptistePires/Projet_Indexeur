@@ -17,14 +17,13 @@ import java.util.stream.Stream;
 public class IndexingEngineSingleton {
     private static final IndexingEngineSingleton INSTANCE;
 
-    private final ArrayList<Table> tables;
-    private FileManager fm;
-    private final Set<String> pathsAllocated;
-
-
     static {
         INSTANCE = new IndexingEngineSingleton();
     }
+
+    private final ArrayList<Table> tables;
+    private final Set<String> pathsAllocated;
+    private final FileManager fm;
 
     private IndexingEngineSingleton() {
         tables = new ArrayList<>();
@@ -62,7 +61,8 @@ public class IndexingEngineSingleton {
         boolean isFirst = true;
 
         Table t;
-        if ((t = getTableByName(tableName)) == null) throw new TableNotFoundException("Table" + tableName + " does not exist.");
+        if ((t = getTableByName(tableName)) == null)
+            throw new TableNotFoundException("Table" + tableName + " does not exist.");
         ArrayList<Column> indexedColumns = t.getIndexedColumns();
 
         // go through upload folder
@@ -134,7 +134,7 @@ public class IndexingEngineSingleton {
     }
 
 
-    public ArrayList<Object[]> handleQuery(Query q)  {
+    public ArrayList<Object[]> handleQuery(Query q) {
         ArrayList<Column> selectedCols;
         Table t = getTableByName(q.from);
 
@@ -165,7 +165,7 @@ public class IndexingEngineSingleton {
                 }
             } catch (NonIndexedColumn e) {
                 nonIndexedColsConditions.add(entry);
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
             }

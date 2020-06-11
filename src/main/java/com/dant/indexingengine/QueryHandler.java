@@ -11,13 +11,13 @@ public class QueryHandler {
 
     private static final QueryHandler INSTANCE;
 
+    static {
+        INSTANCE = new QueryHandler();
+    }
+
     private final IndexingEngineSingleton indexer = IndexingEngineSingleton.getInstance();
 
     private QueryHandler() {
-    }
-
-    static {
-        INSTANCE = new QueryHandler();
     }
 
     public static QueryHandler getInstance() {
