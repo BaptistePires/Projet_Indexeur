@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class FileManagerTest {
 
     private static final String TEST_FILE_LOCATION
-            = Paths.get(".", "src", "main", "resources", "uploads", "unit_tests.csv").toString();
+            = Paths.get(".", "src", "main", "resources", "test", "unit_test.csv").toString();
 
     private static final String TABLE_NAME = "nyc_cab";
 
@@ -64,7 +64,7 @@ class FileManagerTest {
         table.addColumn(new DoubleColumn(columnNames[14]));
         table.addColumn(new DoubleColumn(columnNames[15]));
         table.addColumn(new DoubleColumn(columnNames[16]));
-        table.addColumn(new DoubleColumn(columnNames[17]));
+        table.addColumn(new IntegerColumn(columnNames[17]));
 
         // Set columns N°s
         for (int i = 0; i < columnNames.length; i++) {

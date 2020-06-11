@@ -1,6 +1,5 @@
 package com.dant.indexingengine;
 
-import com.dant.exception.NoDataException;
 import com.dant.exception.TableNotFoundException;
 import com.dant.exception.UnsupportedTypeException;
 import com.dant.exception.WrongFileFormatException;
@@ -12,23 +11,18 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class IndexingEngineTest {
 
 	static QueryHandler queryHandler = QueryHandler.getInstance();
 
 	static IndexingEngineSingleton indexingEngineSingleton = IndexingEngineSingleton.getInstance();
-
-	private static final String TEST_FILE_LOCATION
-			= Paths.get(".", "src", "main", "resources", "uploads", "unit_tests.csv").toString();
 
 	private static String[] columnNames = {"VendorID", "tpep_pickup_datetime", "tpep_dropoff_datetime",
 			"passenger_count", "trip_distance", "RatecodeID", "store_and_fwd_flag", "PULocationID", "DOLocationID",
@@ -63,7 +57,7 @@ class IndexingEngineTest {
 		table.addColumn(new DoubleColumn(columnNames[14]));
 		table.addColumn(new DoubleColumn(columnNames[15]));
 		table.addColumn(new DoubleColumn(columnNames[16]));
-		table.addColumn(new DoubleColumn(columnNames[17]));
+		table.addColumn(new IntegerColumn(columnNames[17]));
 
 		indexingEngineSingleton.addTable(table);
 
@@ -170,12 +164,14 @@ class IndexingEngineTest {
 			result = new JsonObject();
 		}
 
+		System.out.println(result.getAsJsonArray("lines"));
+
 		// THEN
 		assertEquals(10, result.getAsJsonArray("lines").size());
 	}
 
 	@Test()
-	void should_throw_no_data_exception_simple_query() {
+	void should_return_0_results_simple_query() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
 		cols.add(columnNames[0]);
@@ -188,14 +184,21 @@ class IndexingEngineTest {
 
 		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, AND);
 
-		// WHEN, THEN
-		assertThrows(NoDataException.class, () -> {
-			JsonObject result = queryHandler.handleQuery(q);
-		});
+		// WHEN
+		JsonObject result;
+		try {
+			result = queryHandler.handleQuery(q);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = new JsonObject();
+		}
+
+		// THEN
+		assertEquals(0, result.getAsJsonArray("lines").size());
 	}
 
 	@Test
-	void should_throw_no_data_exception_multiple_AND_query() {
+	void should_return_0_results_multiple_AND_query() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
 		cols.add(columnNames[0]);
@@ -218,15 +221,21 @@ class IndexingEngineTest {
 
 		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, AND);
 
-		// WHEN, THEN
-		final JsonObject[] result = new JsonObject[1];
-//		assertThrows(NoDataException.class, () -> {
-//			result[0] = queryHandler.handleQuery(q);
-//		});
+		// WHEN
+		JsonObject result;
+		try {
+			result = queryHandler.handleQuery(q);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = new JsonObject();
+		}
+
+		// THEN
+		assertEquals(0, result.getAsJsonArray("lines").size());
 	}
 
 	@Test
-	void should_throw_no_data_exception_multiple_OR_query() {
+	void should_return_0_results_multiple_OR_query() {
 		// GIVEN
 		List<String> cols = new ArrayList<>();
 		cols.add(columnNames[0]);
@@ -249,11 +258,17 @@ class IndexingEngineTest {
 
 		Query q = new Query("SELECT", cols, conditions, 100, TABLE_NAME, OR);
 
-		// WHEN, THEN
-		final JsonObject[] result = new JsonObject[1];
-		assertThrows(NoDataException.class, () -> {
-			result[0] = queryHandler.handleQuery(q);
-		});
+		// WHEN
+		JsonObject result;
+		try {
+			result = queryHandler.handleQuery(q);
+		} catch (Exception e) {
+			e.printStackTrace();
+			result = new JsonObject();
+		}
+
+		// THEN
+		assertEquals(0, result.getAsJsonArray("lines").size());
 	}
 
 
