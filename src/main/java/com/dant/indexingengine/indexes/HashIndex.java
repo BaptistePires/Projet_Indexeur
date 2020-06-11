@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class HashIndex extends BasicIndex {
 
-    private HashMap<Object, IndexLinesOlder> indexedLines;
+    private HashMap<Object, IndexLinesHolder> indexedLines;
 
     public HashIndex() {
         indexedLines = new HashMap<>();
@@ -22,8 +22,9 @@ public class HashIndex extends BasicIndex {
     public void indexObject(Object o, int noLine) throws IOException {
         indexedLines.computeIfAbsent(o, k -> {
             try {
-                return new IndexLinesOlder();
+                return new IndexLinesHolder();
             } catch (FileNotFoundException e) {
+                // TODO : Exception
                 e.printStackTrace();
                 return null;
             }
@@ -35,5 +36,10 @@ public class HashIndex extends BasicIndex {
     @Override
     public List<Integer> findLinesForObjectEquals(Object o, int limit) throws IOException {
         return indexedLines.containsKey(o) ? indexedLines.get(o).getNumberOfLines(limit) : new ArrayList<>();
+    }
+
+    @Override
+    public List<Integer> findLinesForObjectSuperior(Object o, int limit) throws IOException {
+        return null;
     }
 }

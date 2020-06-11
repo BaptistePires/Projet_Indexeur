@@ -69,6 +69,11 @@ public class NumberIndex extends BasicIndex {
         return returnedList;
     }
 
+    @Override
+    public List<Integer> findLinesForObjectSuperior(Object o, int limit) throws IOException {
+        return null;
+    }
+
     private Comparator<IndexContainer> getComparator(Column c) throws UnsupportedTypeException {
         if (c instanceof IntegerColumn) {
             return Comparator.comparing(o -> ((Integer) o.value));
@@ -82,10 +87,10 @@ public class NumberIndex extends BasicIndex {
     private static class IndexContainer {
 
         public Number value;
-        public IndexLinesOlder lines;
+        public IndexLinesHolder lines;
 
         public IndexContainer(Number i) throws FileNotFoundException {
-            lines = new IndexLinesOlder();
+            lines = new IndexLinesHolder();
             value = i;
         }
 

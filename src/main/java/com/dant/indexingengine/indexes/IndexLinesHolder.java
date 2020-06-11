@@ -8,7 +8,7 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
-class IndexLinesOlder {
+class IndexLinesHolder {
 
     private final ArrayList<Integer> linesNumberBuffer;
     private final RandomAccessFile saveFile;
@@ -16,7 +16,7 @@ class IndexLinesOlder {
     public final int MAX_BUFFERED_LINES = 10000;
 
 
-    IndexLinesOlder() throws FileNotFoundException {
+    IndexLinesHolder() throws FileNotFoundException {
         linesNumberBuffer = new ArrayList<>();
         saveFile = new RandomAccessFile(IndexingEngineSingleton.getInstance().getNewFilePath(), "rw");
         totalLinesInserted = 0;
