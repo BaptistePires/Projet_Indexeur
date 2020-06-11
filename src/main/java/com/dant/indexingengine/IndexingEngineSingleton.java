@@ -119,7 +119,7 @@ public class IndexingEngineSingleton {
     }
 
 
-    public ArrayList<Object[]> handleQuery(Query q) throws Exception {
+    public ArrayList<Object[]> handleQuery(Query q) throws Exception { // TODO : handle exception
         ArrayList<Object[]> lines;
         ArrayList<Column> selectedCols;
         Table t = getTableByName(q.from);
@@ -127,9 +127,9 @@ public class IndexingEngineSingleton {
         ArrayList<Integer> resultLineNos = new ArrayList<>();
         ArrayList<Integer> otherFilter;
 
-        ArrayList<Object[]> returnedLines = new ArrayList<>();
         ArrayList<Map.Entry<String, Map<String, Object>>> nonIndexedColsConditions = new ArrayList<>();
         int nbCond = 0;
+
         // Iterate through conditions
         for (Map.Entry<String, Map<String, Object>> entry : q.where.entrySet()) {
             try {
@@ -160,34 +160,88 @@ public class IndexingEngineSingleton {
         }
 
         // Handle non indexed cols
-        int testedLines = 0;
-        Object lineValue;
-        while (resultLineNos.size() + returnedLines.size() < q.limit) {
-            try {
-                for (Object[] o : fm.getLinesInterval(testedLines, testedLines + 1000, t.getColumns(), t.getColumns())) {
-                    for (Map.Entry<String, Map<String, Object>> e : nonIndexedColsConditions) {
-                        lineValue = o[t.getColumnByName(e.getKey()).getColumnNo()];
-
-                        if (lineValue.equals(t.getColumnByName(e.getKey()).castString(e.getValue().get("value").toString()))) {
-                            returnedLines.add(o);
-                        }
-                    }
-                }
-
-                testedLines += 1000;
-            } catch (IndexOutOfBoundsException e) { // thrown by FileManager when testedLine becomes higher than total lines
-                break;
-            }
+        if (q.operator.equalsIgnoreCase("or")) {
+            resultLineNos = handleOrQueriesNonIndexedCols(t, q, resultLineNos, nonIndexedColsConditions);
+        } else {
+            resultLineNos = handleANDQueriesNonIndexedCols(t, q, resultLineNos, nonIndexedColsConditions);
         }
 
-
+        // Used to filter response
         if (q.cols.get(0).equals("*")) selectedCols = t.getColumns();
         else selectedCols = t.getColumnsByNames(q.cols);
+
+        ArrayList<Object[]> returnedLines = new ArrayList<>();
 
         if (!resultLineNos.isEmpty()) {
             returnedLines.addAll(fm.getLines(resultLineNos, t.getColumns(), selectedCols));
         }
         return new ArrayList<>(returnedLines.subList(0, Math.min(q.limit, returnedLines.size())));
+    }
+
+    public ArrayList<Integer> handleANDQueriesNonIndexedCols(Table t, Query q, ArrayList<Integer> indexedLinesNos, ArrayList<Map.Entry<String, Map<String, Object>>> nonIndexedColsConditions) {
+        ArrayList<Integer> tmpList = new ArrayList<>();
+        boolean matchedConditions = false;
+        int runningLineNo = 0;
+        int testedLines = 0;
+        Object lineValue;
+
+        while (tmpList.size() < q.limit && runningLineNo < fm.countLine()) {
+            try {
+                for (Object[] o : fm.getLinesInterval(testedLines, testedLines + 1000, t.getColumns(), t.getColumns())) {
+
+                    // We check every condition to see if the line matches it, as it's an AND, we need to match every single condition
+                    for (Map.Entry<String, Map<String, Object>> e : nonIndexedColsConditions) {
+                        lineValue = o[t.getColumnByName(e.getKey()).getColumnNo()];
+
+                        if (lineValue.equals(t.getColumnByName(e.getKey()).castString(e.getValue().get("value").toString()))) {
+                            matchedConditions = true;
+                        } else {
+                            matchedConditions = false;
+                            break;
+                        }
+                    }
+                    if (matchedConditions) {
+                        // If the line matched indexed cols too (in case the AND operator was on an indexed col)
+                        if (indexedLinesNos.contains(runningLineNo)) tmpList.add(runningLineNo);
+                    }
+                    matchedConditions = false;
+                    runningLineNo++;
+                }
+
+                testedLines += 1000;
+            } catch (IndexOutOfBoundsException | IOException e) { // thrown by FileManager when testedLine becomes higher than total lines
+                break;
+            }
+        }
+        return tmpList;
+    }
+
+    public ArrayList<Integer> handleOrQueriesNonIndexedCols(Table t, Query q, ArrayList<Integer> indexedLinesNos, ArrayList<Map.Entry<String, Map<String, Object>>> nonIndexedColsConditions) {
+        int testedLines = 0;
+        int runningLineNo = 0;
+        Object lineValue;
+        while (indexedLinesNos.size() < q.limit) {
+            try {
+                for (Object[] o : fm.getLinesInterval(testedLines, testedLines + 1000, t.getColumns(), t.getColumns())) {
+                    // Check for every single condition, as it's an OR operator, we only need to meet 1, so we can break
+                    for (Map.Entry<String, Map<String, Object>> e : nonIndexedColsConditions) {
+                        lineValue = o[t.getColumnByName(e.getKey()).getColumnNo()];
+
+                        if (lineValue.equals(t.getColumnByName(e.getKey()).castString(e.getValue().get("value").toString()))) {
+                            indexedLinesNos.add(runningLineNo);
+                            break;
+                        }
+                    }
+                    runningLineNo++;
+                }
+
+                testedLines += 1000;
+            } catch (IndexOutOfBoundsException | IOException e) { // thrown by FileManager when testedLine becomes higher than total lines
+                break;
+            }
+        }
+        return indexedLinesNos;
+
     }
 
 

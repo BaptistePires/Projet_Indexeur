@@ -31,8 +31,9 @@ public class HashIndex extends BasicIndex {
         indexedLines.get(o).addLine(noLine);
     }
 
+
     @Override
-    public List<Integer> findLinesForObject(Object o, int limit) throws IOException {
+    public List<Integer> findLinesForObjectEquals(Object o, int limit) throws IOException {
         return indexedLines.containsKey(o) ? indexedLines.get(o).getNumberOfLines(limit) : new ArrayList<>();
     }
 }

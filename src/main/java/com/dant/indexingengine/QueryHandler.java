@@ -39,7 +39,7 @@ public class QueryHandler {
         else
             returnedData.add("columns", new Gson().toJsonTree(q.cols));
         ArrayList<Object[]> lines = indexer.handleQuery(q);
-        if (lines.isEmpty()) throw new NoDataException();
+//        if (lines.isEmpty()) throw new NoDataException();
         returnedData.add("count", new Gson().toJsonTree(lines.size()));
         returnedData.add("lines", new Gson().toJsonTree(lines));
 

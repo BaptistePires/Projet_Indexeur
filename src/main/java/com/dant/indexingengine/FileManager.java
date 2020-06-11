@@ -95,7 +95,7 @@ public class FileManager {
         }
     }
 
-    public ArrayList<Object[]> getLinesInterval(int start, int end, ArrayList<Column> allCols, ArrayList<Column> selectedCols) throws Exception {
+    public ArrayList<Object[]> getLinesInterval(int start, int end, ArrayList<Column> allCols, ArrayList<Column> selectedCols) throws IndexOutOfBoundsException, IOException {
         if (end < start || start < 0 || start > countLines)
             throw new IndexOutOfBoundsException("[FileManager - getLinesInterval] Issue with start and stop, start :" + start + " end :" + end);
 

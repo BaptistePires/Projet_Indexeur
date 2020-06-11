@@ -75,11 +75,11 @@ public abstract class Column implements Serializable {
 
         if (isIndexed()) {
             if (this instanceof IntegerColumn) {
-                if (o instanceof Integer) return new ArrayList<>(index.findLinesForObject(o, limit));
+                if (o instanceof Integer) return new ArrayList<>(index.findLinesForObjectEquals(o, limit));
                 // Else if Double cast to Integer
-                return new ArrayList<>(index.findLinesForObject(((Double) o).intValue(), limit));
+                return new ArrayList<>(index.findLinesForObjectEquals(((Double) o).intValue(), limit));
             } else {
-                return new ArrayList<>(index.findLinesForObject(o, limit));
+                return new ArrayList<>(index.findLinesForObjectEquals(o, limit));
             }
 
         }

@@ -44,17 +44,13 @@ public class NumberIndex extends BasicIndex {
     }
 
     @Override
-    public List<Integer> findLinesForObject(Object o, int limit) throws IOException {
-        return null;
-    }
-
-    public List<Integer> findLinesForObjectEquals(Object o, int limit) throws Exception {
-        if (!sorted) throw new Exception("[NumberIndex - findLinesForObjectEquals] index not sorted");
+    public List<Integer> findLinesForObjectEquals(Object o, int limit) throws IOException {
+        if (!sorted) sort();
         int low = 0, high = indexedLines.size();
         int mid;
         int index = -1;
         double key = Double.parseDouble(o.toString());
-        double runningVal;
+
         List<Integer> returnedList = null;
         while (low <= high) {
             mid = (low + high) / 2;
@@ -67,8 +63,9 @@ public class NumberIndex extends BasicIndex {
                 low = mid + 1;
             }
         }
-        System.out.println("index" + index);
+
         if (index > 0) returnedList = indexedLines.get(index).lines.getNumberOfLines(limit);
+
         return returnedList;
     }
 
