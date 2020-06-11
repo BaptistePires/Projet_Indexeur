@@ -7,14 +7,16 @@ import com.dant.indexingengine.columns.DoubleColumn;
 import com.dant.indexingengine.columns.IntegerColumn;
 import com.dant.indexingengine.columns.StringColumn;
 import com.google.gson.JsonObject;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -36,8 +38,26 @@ class IndexingEngineTest {
 	private static final String AND = "AND";
 	private static final String OR = "OR";
 
+	private static File uploadsFolder = Paths.get("src", "main", "resources", "uploads").toFile();
+
 	@BeforeAll
 	static void setUp() throws UnsupportedTypeException, TableNotFoundException, IOException, WrongFileFormatException {
+
+		if(!uploadsFolder.exists()){
+			uploadsFolder.mkdirs();
+		}else{
+			for(String file: Objects.requireNonNull(uploadsFolder.list())) {
+				File f = Paths.get("src", "main", "resources", "uploads", file).toFile();
+				f.delete();
+			}
+		}
+
+		// Copying test file
+		File source = Paths.get("src", "main", "resources", "test", "unit_test.csv").toFile();
+		File dest = Paths.get("src", "main", "resources", "uploads", "unit_test.csv").toFile();
+		Files.copy(source.toPath(), dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
+
+		// Setting up indexer
 		Table table = new Table(TABLE_NAME);
 
 		table.addColumn(new IntegerColumn(columnNames[0]));
@@ -65,6 +85,14 @@ class IndexingEngineTest {
 		indexingEngineSingleton.getTableByName(TABLE_NAME).getColumnByName(INDEXED_COL_NAME_2).setIndexed();
 
 		indexingEngineSingleton.startIndexing(TABLE_NAME);
+	}
+
+	@AfterAll
+	static void endUp() {
+		for(String file: Objects.requireNonNull(uploadsFolder.list())) {
+			File f = Paths.get("src", "main", "resources", "uploads", file).toFile();
+			f.delete();
+		}
 	}
 
 	@Test
