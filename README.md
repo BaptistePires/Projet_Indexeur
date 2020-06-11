@@ -12,7 +12,7 @@ Supervised by [Olivier PITTON](https://www.linkedin.com/in/olivier-pitton-426049
 
 ## Project description:
 
-The goal of this project is to conceive and develop an Indexing Engine facilitating fast and accurate information retrieval from a database.
+* The goal of this project is to conceive and develop an Indexing Engine facilitating fast and accurate information retrieval from a database.
 
 ## Getting Started
 
