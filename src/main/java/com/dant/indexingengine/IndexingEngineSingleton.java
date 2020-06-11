@@ -25,7 +25,6 @@ public class IndexingEngineSingleton {
             tmpFolder.mkdirs();
         }else{
             for(String file: Objects.requireNonNull(tmpFolder.list())) {
-                System.out.println(file);
                 File f = Paths.get("src", "main", "resources", "tmp", file).toFile();
                 f.delete();
             }
@@ -93,7 +92,6 @@ public class IndexingEngineSingleton {
         File uploadFolder = Paths.get("src", "main", "resources", "uploads").toFile();
 
         for (String file : Objects.requireNonNull(uploadFolder.list())) {
-            if (file.contains("test")) continue;
             System.out.println("[IndexingEngineSingleton - StartIndexing] - Indexing file : " + file);
 
             fis = new FileInputStream(Paths.get("src", "main", "resources", "uploads", file).toFile());
