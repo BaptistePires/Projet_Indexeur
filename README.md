@@ -14,10 +14,9 @@ Supervised by [Olivier PITTON](https://www.linkedin.com/in/olivier-pitton-426049
 
 The goal of this project is to conceive and develop an Indexing Engine facilitating fast and accurate information retrieval from a database.
 
-## Data Source:
+## Getting Started
 
-NYC TLC Trip Record Data: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
-
+- To run the project, execute `mvn jetty:run-war`
 
 ## Documentation
 
@@ -25,15 +24,12 @@ NYC TLC Trip Record Data: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-da
 - OpenAPI Specification: http://localhost:8080/api/openapi.json
 - Project Information and Reports: Execute `mvn site:run` in a separate terminal. The reports will be generated and visible at http://localhost:9000/
 
-## Getting Started
-
-- To run the project, execute `mvn jetty:run-war`
 
 ## Operations:
 
 - Create Table
   - API Call (POST): http://localhost:8080/api/indexer/createTable
-  * Request Body:
+  * Request Body example:
     ```json
     {
       "name": "TableName",
@@ -130,7 +126,7 @@ NYC TLC Trip Record Data: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-da
 
 - Upload data
   - API Call (POST): http://localhost:8080/api/indexer/uploadData
-  * Request Body: 
+  * Request Body example: 
     * form-data
     *   file = yellow_tripdata_2019-01.csv (csv files can be downloaded here: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page)
 
