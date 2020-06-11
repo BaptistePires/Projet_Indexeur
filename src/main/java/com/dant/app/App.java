@@ -34,6 +34,7 @@ public class App extends Application {
         sets.add(InvalidIndexException.class);
         sets.add(InvalidIndexExceptionMapper.class);
         sets.add(UnsupportedTypeExceptionMapper.class);
+        sets.add(WrongFileFormatExceptionMapper.class);
         sets.add(InvalidFileException.class);
         sets.add(InvalidFileExceptionMapper.class);
         sets.add(NoDataException.class);

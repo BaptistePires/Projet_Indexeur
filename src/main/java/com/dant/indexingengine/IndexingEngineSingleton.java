@@ -1,6 +1,7 @@
 package com.dant.indexingengine;
 
 import com.dant.exception.NonIndexedColumn;
+import com.dant.exception.TableNotFoundException;
 import com.dant.indexingengine.columns.Column;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
@@ -12,21 +13,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-// TODO : Tmp -> improve after POC (Move to another class handling data) + Parse ALL colums, not just indexes
-// Will work with only one index currently
 public class IndexingEngineSingleton {
     private static final IndexingEngineSingleton INSTANCE;
 
     private final ArrayList<Table> tables;
     private FileManager fm;
-    private HashMap<Integer, Integer> index;
     private final Set<String> pathsAllocated;
 
-    private final boolean indexed;
-    private final boolean indexing;
-    private boolean error;
-
-    private int lineNum;
 
     static {
         INSTANCE = new IndexingEngineSingleton();
@@ -34,12 +27,10 @@ public class IndexingEngineSingleton {
 
     private IndexingEngineSingleton() {
         tables = new ArrayList<>();
-        indexed = false;
-        indexing = false;
         try {
             fm = new FileManager();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            throw new RuntimeException("[IndexingEngineSingleton - Constructor] Can't create file.");
         }
         pathsAllocated = new HashSet<>();
 
@@ -55,7 +46,7 @@ public class IndexingEngineSingleton {
      * @param fileName path to .csv file;
      * @throws {@link IOException}
      */
-    public void startIndexing(String fileName, String tableName) throws IOException {
+    public void startIndexing(String fileName, String tableName) throws IOException, TableNotFoundException {
 
         // Files related vars
         FileInputStream fis;
@@ -70,12 +61,12 @@ public class IndexingEngineSingleton {
         boolean isFirst = true;
 
         Table t;
-        //TODO : Exception table does not exist
-        if ((t = getTableByName(tableName)) == null) return;
+        if ((t = getTableByName(tableName)) == null) throw new TableNotFoundException("Table" + tableName + " does not exist.");
         ArrayList<Column> indexedColumns = t.getIndexedColumns();
 
         // go through upload folder
         File uploadFolder = Paths.get("src", "main", "resources", "uploads").toFile();
+
         for (String file : Objects.requireNonNull(uploadFolder.list())) {
             if (file.contains("test")) continue;
             System.out.println("[IndexingEngineSingleton - StartIndexing] - Indexing file : " + file);
@@ -145,7 +136,6 @@ public class IndexingEngineSingleton {
 
 
     public ArrayList<Object[]> handleQuery(Query q) throws Exception { // TODO : handle exception
-        ArrayList<Object[]> lines;
         ArrayList<Column> selectedCols;
         Table t = getTableByName(q.from);
 
@@ -290,21 +280,6 @@ public class IndexingEngineSingleton {
         this.tables.add(t);
     }
 
-    public boolean isIndexed() {
-        return indexed;
-    }
-
-    public boolean isAvailable() {
-        return !indexing;
-    }
-
-    public boolean canIndex() {
-        return true;
-    }
-
-    public boolean canQuery() {
-        return indexed && !indexing && !error;
-    }
 
     public String getNewFilePath() {
         // TODO : Find a way to clear dirs on server shutdown
@@ -314,8 +289,6 @@ public class IndexingEngineSingleton {
         pathsAllocated.add(tmpName);
         return tmpName;
     }
-
-
 }
 
 
