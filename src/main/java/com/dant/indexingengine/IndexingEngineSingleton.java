@@ -19,6 +19,19 @@ public class IndexingEngineSingleton {
 
     static {
         INSTANCE = new IndexingEngineSingleton();
+
+        File tmpFolder = Paths.get("src", "main", "resources", "tmp").toFile();
+        for(String file: Objects.requireNonNull(tmpFolder.list())) {
+            File f = Paths.get("src", "main", "resources", "tmp", file).toFile();
+            f.delete();
+        }
+
+        File uploadsFolder = Paths.get("src", "main", "resources", "uploads").toFile();
+        for(String file: Objects.requireNonNull(uploadsFolder.list())) {
+            if(file.equalsIgnoreCase("unit_test.csv")) continue;
+            File f = Paths.get("src", "main", "resources", "uploads", file).toFile();
+            f.delete();
+        }
     }
 
     private final ArrayList<Table> tables;
