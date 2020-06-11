@@ -30,7 +30,7 @@ public class IntegerColumn extends Column {
 
     @Override
     public Object castString(String s) {
-        return (int) Double.parseDouble(s);
+        return s.equalsIgnoreCase("") ? 0 : (int) Double.parseDouble(s);
 
     }
 
